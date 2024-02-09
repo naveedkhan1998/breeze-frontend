@@ -1,0 +1,5 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+/* src/styles/index.css */
+@import 'flowbite/css/flowbite.css';
