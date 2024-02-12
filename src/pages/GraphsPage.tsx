@@ -1,7 +1,9 @@
+import { useRef, useEffect } from "react";
 import { useGetCandlesQuery } from "../services/instrumentService";
 import { Instrument } from "./HomePage";
 import { useLocation } from "react-router-dom";
-import { Table } from "flowbite-react";
+import { createChart, CandlestickData } from "lightweight-charts";
+import { formatDate } from "../common-functions";
 
 type Candle = {
   open: number;
@@ -15,43 +17,53 @@ const GraphsPage = () => {
   const location = useLocation();
   const { obj }: { obj: Instrument } = location.state;
   const { data } = useGetCandlesQuery({ id: obj.id });
-  /* if (isSuccess) {
-    console.log(data);
-  } */
-  //const candles: Candle[] = data.data as Candle[];
+  const chartContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // console.log(obj.id);
+  useEffect(() => {
+    if (data && chartContainerRef.current) {
+      // Cleanup the chart when the component is unmounted
+      chartContainerRef.current.innerHTML = "";
+      // Create a new chart
+      const chart = createChart(chartContainerRef.current!, {
+        width: 1200,
+        height: 800,
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: false,
+          // tickMarkFormatter: (time: number) => {
+          //   const date = new Date(time * 1000);
+          //   const hours = date.getHours();
+          //   const minutes = date.getMinutes();
+          //   const period = hours >= 12 ? "PM" : "AM";
+          //   const formattedHours = hours % 12 || 12;
+          //   return `${formattedHours}:${
+          //     minutes < 10 ? "0" : ""
+          //   }${minutes} ${period}`;
+          // },
+        },
+        crosshair: {
+          mode: 0,
+        },
+      });
+      const series = chart.addCandlestickSeries();
+      const seriesData: CandlestickData[] = data.data.map(
+        ({ date, open, high, low, close }: Candle) => ({
+          time: formatDate(date),
+          open,
+          high,
+          low,
+          close,
+        })
+      );
 
+      series.setData(seriesData);
+    }
+  }, [data]);
+
+  // Render your chart container here
   return (
-    <div className="h-[95dvh] dark:bg-black/80 ">
-      <div className="overflow-x-auto">
-        <Table striped hoverable>
-          <Table.Head>
-            <Table.HeadCell>Open</Table.HeadCell>
-            <Table.HeadCell>High</Table.HeadCell>
-            <Table.HeadCell>Low</Table.HeadCell>
-            <Table.HeadCell>Close</Table.HeadCell>
-            <Table.HeadCell>Date</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            {data &&
-              data.data.map((candle: Candle) => (
-                <Table.Row
-                  key={candle.date}
-                  className="bg-white dark:border-gray-700 dark:bg-gray-800"
-                >
-                  <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                    {candle.open}
-                  </Table.Cell>
-                  <Table.Cell>{candle.high}</Table.Cell>
-                  <Table.Cell>{candle.low}</Table.Cell>
-                  <Table.Cell>{candle.close}</Table.Cell>
-                  <Table.Cell>{candle.date}</Table.Cell>
-                </Table.Row>
-              ))}
-          </Table.Body>
-        </Table>
-      </div>
+    <div className="h-[95dvh] dark:bg-black/80 items-center flex justify-center">
+      <div ref={chartContainerRef} />
     </div>
   );
 };
