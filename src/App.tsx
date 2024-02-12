@@ -1,11 +1,37 @@
-
+import { useAppSelector } from "./app/hooks";
+import Navbar from "./components/Navbar";
+import Toast from "./components/ToastContainer";
+import { getCurrentToken } from "./features/authSlice";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import GraphsPage from "./pages/GraphsPage";
+import HomePage from "./pages/HomePage";
+import InstrumentsPage from "./pages/InstrumentsPage";
+import LoginRegPage from "./pages/LoginRegPage";
+import { Flowbite } from "flowbite-react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 const App = () => {
+  const access_token = useAppSelector(getCurrentToken);
   return (
-    <div className='flex items-center justify-center'>
-      <p>Hello World</p>
-    </div>
-  )
-}
+    <BrowserRouter>
+      <Flowbite>
+        <Navbar />
+        <Routes>
+          <Route
+            path="/"
+            element={access_token ? <HomePage /> : <LoginRegPage />}
+          />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/instruments" element={<InstrumentsPage />} />
+          <Route path="/graphs/:id" element={<GraphsPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+        </Routes>
 
-export default App
+        <Toast />
+      </Flowbite>
+    </BrowserRouter>
+  );
+};
+
+export default App;
