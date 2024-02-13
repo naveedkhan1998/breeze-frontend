@@ -24,3 +24,11 @@ export type Instrument = {
   exchange_code: string;
   exchange: number;
 };
+
+export type Candle = {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  date: string;
+};

@@ -1,11 +1,47 @@
-import React from 'react'
+import { FloatingLabel, Tabs } from "flowbite-react";
+import { ChangeEvent, useState } from "react";
+import Instrument from "../components/Instrument";
 
 const InstrumentsPage = () => {
-  return (
-    <div className="h-[95dvh] dark:bg-black/80 ">
-      INS
-    </div>
-  )
-}
+  const [searchData, setSearchData] = useState({
+    searchTerm: "",
+  });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setSearchData((prevData) => ({ ...prevData, [id]: value }));
+  };
 
-export default InstrumentsPage
+  return (
+    <div className=" min-h-screen dark:bg-black/80 ">
+      <div className="flex flex-col items-center justify-center pt-10  rounded-xl">
+        <div>
+          {" "}
+          <FloatingLabel
+            className=" w-[70dvw]"
+            variant="standard"
+            label="Search"
+            id="searchTerm"
+            type="text"
+            value={searchData.searchTerm}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <Tabs aria-label="Default tabs" style="fullWidth">
+          <Tabs.Item active title="NSE">
+            <Instrument exchange="NSE" searchTerm={searchData.searchTerm} />
+          </Tabs.Item>
+          <Tabs.Item title="BSE">
+            <Instrument exchange="BSE" searchTerm={searchData.searchTerm} />
+          </Tabs.Item>
+          <Tabs.Item title="NFO">
+            <Instrument exchange="FON" searchTerm={searchData.searchTerm} /> {/* FON is NFO in backend */}
+          </Tabs.Item>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default InstrumentsPage;
