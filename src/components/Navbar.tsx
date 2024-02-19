@@ -1,16 +1,25 @@
 import { Avatar, Dropdown, Navbar as FlowbiteNavbar } from "flowbite-react";
-import { useDispatch } from "react-redux";
 import { removeToken } from "../services/LocalStorageService";
 import { logOut } from "../features/authSlice";
 import { toast } from "react-toastify";
 import { DarkThemeToggle } from "flowbite-react";
 import { Link } from "react-router-dom";
+import { setMode } from "../features/darkModeSlice";
+import { useAppDispatch } from "../app/hooks";
 const Navbar = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const signOut = () => {
     removeToken();
     dispatch(logOut());
     toast.success("Logged Out");
+  };
+
+  const handleClick = () => {
+    console.log(localStorage.getItem("flowbite-theme-mode"));
+
+    setTimeout(() => {
+      dispatch(setMode());
+    }, 50);
   };
 
   return (
@@ -26,7 +35,7 @@ const Navbar = () => {
         </span>
       </FlowbiteNavbar.Brand>
       <div className="flex md:order-2">
-        <DarkThemeToggle className=" mr-2" />
+        <DarkThemeToggle onClickCapture={handleClick} className=" mr-2" />
         <FlowbiteNavbar.Toggle />
         <Dropdown
           arrowIcon={false}
@@ -53,11 +62,36 @@ const Navbar = () => {
         </Dropdown>
       </div>
       <FlowbiteNavbar.Collapse>
-        <Link to="/" className=" dark:text-white hover:text-cyan-500 transition-colors delay-200" >Home</Link>
-        <Link to="/instruments" className=" dark:text-white hover:text-cyan-500 transition-colors delay-200">Instruments</Link>
-        <Link to="/graphs" className=" dark:text-white hover:text-cyan-500 transition-colors delay-200">Graphs</Link>
-        <Link to="/about" className=" dark:text-white hover:text-cyan-500 transition-colors delay-200">About</Link>
-        <Link to="/contact" className=" dark:text-white hover:text-cyan-500 transition-colors delay-200">Contact</Link>
+        <Link
+          to="/"
+          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+        >
+          Home
+        </Link>
+        <Link
+          to="/instruments"
+          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+        >
+          Instruments
+        </Link>
+        <Link
+          to="/accounts"
+          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+        >
+          Accounts
+        </Link>
+        <Link
+          to="/about"
+          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+        >
+          About
+        </Link>
+        <Link
+          to="/contact"
+          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+        >
+          Contact
+        </Link>
       </FlowbiteNavbar.Collapse>
     </FlowbiteNavbar>
   );

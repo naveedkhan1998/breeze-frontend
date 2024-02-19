@@ -26,12 +26,11 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
   };
 
   return (
-    <div className=" w-[70dvw]">
+    <div className="w-[70dvw] dark:bg-gray-900 overflow-auto max-h-[70dvh]">
       <Table striped hoverable>
         <Table.Head>
           <Table.HeadCell>Company Name</Table.HeadCell>
-          <Table.HeadCell>Token</Table.HeadCell>
-          <Table.HeadCell>Instrument</Table.HeadCell>
+          <Table.HeadCell>Series</Table.HeadCell>
           <Table.HeadCell>Short Name</Table.HeadCell>
           <Table.HeadCell>Subscribe</Table.HeadCell>
         </Table.Head>
@@ -45,11 +44,17 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {instrument.company_name}
                 </Table.Cell>
-                <Table.Cell>{instrument.token}</Table.Cell>
-                <Table.Cell>{instrument.company_name}</Table.Cell>
+                <Table.Cell>{instrument.series}</Table.Cell>
                 <Table.Cell>{instrument.short_name}</Table.Cell>
                 <Table.Cell>
-                  <Button pill outline gradientDuoTone="purpleToBlue" onClick={() => handleClick(instrument.id)}>+</Button>
+                  <Button
+                    //pill
+                    outline
+                    gradientDuoTone="purpleToBlue"
+                    onClick={() => handleClick(instrument.id)}
+                  >
+                    +
+                  </Button>
                 </Table.Cell>
               </Table.Row>
             ))}

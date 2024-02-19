@@ -13,11 +13,14 @@ import {
 import { formatDate } from "../common-functions";
 import { Dropdown, Spinner, Button } from "flowbite-react";
 import { Candle } from "../common-types";
+import { useAppSelector } from "../app/hooks";
+import { getMode } from "../features/darkModeSlice";
 
 const GraphsPage = () => {
   const location = useLocation();
+  const mode = useAppSelector(getMode);
   const { obj }: { obj: Instrument } = location.state;
-  const [timeframe, setTimeFrame] = useState(5);
+  const [timeframe, setTimeFrame] = useState(5); // default tf = 5
   const { data, refetch, isLoading } = useGetCandlesQuery({
     id: obj.id,
     tf: timeframe,
@@ -45,6 +48,17 @@ const GraphsPage = () => {
           width: window.innerWidth * 0.9,
           height: window.innerHeight * 0.7,
           layout: {
+            textColor:
+              localStorage.getItem("flowbite-theme-mode") === "dark"
+                ? "#FFFFFF"
+                : "#374151",
+            background: {
+              color:
+                localStorage.getItem("flowbite-theme-mode") === "dark"
+                  ? "#374151"
+                  : "#FFFFFF",
+            },
+
             fontSize: 14,
           },
           timeScale: {
@@ -80,7 +94,7 @@ const GraphsPage = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [data]);
+  }, [data,mode]);
 
   const handleTfChange = (tf: number) => {
     setTimeFrame(tf);
@@ -91,11 +105,12 @@ const GraphsPage = () => {
 
   const handleClick = (id: number) => {
     loadInstrumentCandles({ id: id });
+    refetch();
     //console.log(id);
   };
 
   return (
-    <div className="h-[95vh] dark:bg-black/80 items-center flex justify-center flex-col">
+    <div className="dark:bg-gray-900 h-[94.5dvh] items-center flex justify-center flex-col">
       {isLoading ? (
         <div className="text-center">
           <Spinner size="xl" aria-label="Center-aligned spinner example" />

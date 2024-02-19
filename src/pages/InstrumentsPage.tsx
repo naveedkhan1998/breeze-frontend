@@ -12,7 +12,7 @@ const InstrumentsPage = () => {
   };
 
   return (
-    <div className=" min-h-screen dark:bg-black/80 ">
+    <div className=" dark:bg-gray-900  h-[94.5dvh] p-8">
       <div className="flex flex-col items-center justify-center pt-10  rounded-xl">
         <div>
           {" "}
@@ -36,7 +36,8 @@ const InstrumentsPage = () => {
             <Instrument exchange="BSE" searchTerm={searchData.searchTerm} />
           </Tabs.Item>
           <Tabs.Item title="NFO">
-            <Instrument exchange="FON" searchTerm={searchData.searchTerm} /> {/* FON is NFO in backend */}
+            <Instrument exchange="FON" searchTerm={searchData.searchTerm} />{" "}
+            {/* FON is NFO in backend */}
           </Tabs.Item>
         </Tabs>
       </div>

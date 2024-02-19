@@ -5,7 +5,7 @@ import Registration from "../components/Registration";
 //import { MdDashboard } from "react-icons/md";
 const LoginRegPage = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-[100dvh] pt-12 dark:bg-black/80 ">
+    <div className="flex flex-col items-center justify-center  pt-12 dark:bg-gray-900 h-[94.5dvh]">
       <Tabs
         aria-label="Full width tabs"
         style="underline"

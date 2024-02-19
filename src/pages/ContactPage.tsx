@@ -2,7 +2,7 @@ import React from 'react'
 
 const ContactPage = () => {
   return (
-    <div className="h-[95dvh] dark:bg-black/80 ">
+    <div className=" dark:bg-gray-900 h-[94.5dvh] ">
       Contact
     </div>
   )

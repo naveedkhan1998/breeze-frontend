@@ -32,3 +32,13 @@ export type Candle = {
   close: number;
   date: string;
 };
+
+export interface BreezeAccount {
+  id: number;
+  name: string;
+  api_key: string;
+  api_secret: string;
+  session_token: string;
+  last_updated: string;
+  is_active: boolean;
+}

@@ -2,7 +2,7 @@ import {
   useDeleteInstrumentMutation,
   useGetSubscribedInstrumentsQuery,
 } from "../services/instrumentService";
-import { Button, Table, Banner } from "flowbite-react";
+import { Button, Table } from "flowbite-react";
 import { Link } from "react-router-dom";
 
 export type Instrument = {
@@ -21,25 +21,20 @@ export type Instrument = {
 };
 
 const HomePage = () => {
-  const { data } = useGetSubscribedInstrumentsQuery("");
+  const { data, refetch } = useGetSubscribedInstrumentsQuery("");
   const [deleteInstrument] = useDeleteInstrumentMutation();
 
   const handleDelete = (id: number) => {
     deleteInstrument({ id: id });
+    refetch();
   };
 
   return (
-    <div className="h-[95dvh] dark:bg-black/80">
-      <div className="overflow-x-auto">
-        <Banner>
-          <div className="flex w-full justify-between border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700 rounded-lg">
-            <div className="mx-auto flex items-center">
-              <p className="flex items-center text-lg font-bold text-gray-500 dark:text-gray-400">
-                <span className="[&_p]:inline">Subscribed Instruments:</span>
-              </p>
-            </div>
-          </div>
-        </Banner>
+    <div className="dark:bg-gray-900 h-[94.5dvh] items-center justify-normal flex flex-col">
+      <div className="dark:text-white text-4xl  text-gray-900 m-10">
+        <p>Subscribed Instruments</p>
+      </div>
+      <div className="overflow-auto max-h-[70dvh] w-[90dvw] ">
         <Table striped hoverable>
           <Table.Head>
             <Table.HeadCell>Company Name</Table.HeadCell>
@@ -75,6 +70,7 @@ const HomePage = () => {
                   </Table.Cell>
                   <Table.Cell>
                     <Button
+                      pill
                       outline
                       gradientDuoTone="pinkToOrange"
                       onClick={() => handleDelete(instrument.id)}
