@@ -19,7 +19,7 @@ const Navbar = () => {
 
     setTimeout(() => {
       dispatch(setMode());
-    }, 50);
+    }, 5);
   };
 
   return (
