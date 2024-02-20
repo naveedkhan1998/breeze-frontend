@@ -23,7 +23,7 @@ const Navbar = () => {
   };
 
   return (
-    <FlowbiteNavbar fluid className=" shadow-2xl">
+    <FlowbiteNavbar fluid>
       <FlowbiteNavbar.Brand href="#">
         <img
           src="/vite.svg"
@@ -62,36 +62,41 @@ const Navbar = () => {
         </Dropdown>
       </div>
       <FlowbiteNavbar.Collapse>
-        <Link
+        <FlowbiteNavbar.Link
+          as={Link}
           to="/"
           className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
         >
           Home
-        </Link>
-        <Link
+        </FlowbiteNavbar.Link>
+        <FlowbiteNavbar.Link
+          as={Link}
           to="/instruments"
           className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
         >
           Instruments
-        </Link>
-        <Link
+        </FlowbiteNavbar.Link>
+        <FlowbiteNavbar.Link
+          as={Link}
           to="/accounts"
           className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
         >
           Accounts
-        </Link>
-        <Link
+        </FlowbiteNavbar.Link>
+        <FlowbiteNavbar.Link
+          as={Link}
           to="/about"
           className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
         >
           About
-        </Link>
-        <Link
+        </FlowbiteNavbar.Link>
+        <FlowbiteNavbar.Link
+          as={Link}
           to="/contact"
           className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
         >
           Contact
-        </Link>
+        </FlowbiteNavbar.Link>
       </FlowbiteNavbar.Collapse>
     </FlowbiteNavbar>
   );
