@@ -9,5 +9,17 @@ const baseQuery = fetchBaseQuery({
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery,
-  endpoints: (builder) => ({}),
+  endpoints: (builder) => ({
+    healthCheck: builder.query({
+      query: () => ({
+        url: "/",
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+        },
+      }),
+    }),
+  }),
 });
+
+export const { useHealthCheckQuery } = baseApi;
