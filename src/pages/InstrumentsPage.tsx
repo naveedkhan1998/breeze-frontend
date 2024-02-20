@@ -17,7 +17,7 @@ const InstrumentsPage = () => {
         <div>
           {" "}
           <FloatingLabel
-            className=" w-[70dvw]"
+            className=" w-[95dvw]"
             variant="standard"
             label="Search"
             id="searchTerm"

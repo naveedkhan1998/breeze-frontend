@@ -67,28 +67,28 @@ const AccountsPage = () => {
           {data.data.map((item: BreezeAccount) => (
             <Card
               key={item.id}
-              className="w-[60dvw] bg-white dark:bg-gray-700 shadow-md rounded-md p-4 space-y-4"
+              className="w-[60dvw] bg-white dark:bg-gray-800 shadow-md rounded-md p-4 space-y-4"
             >
               <h5 className="text-2xl font-serif font-bold tracking-tight text-gray-900 dark:text-white">
                 Account Name: {item.name}
               </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
+              <p className="font-normal text-gray-800 dark:text-gray-400">
                 Session Token: {item.session_token}
               </p>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
+              <p className="font-normal text-gray-800 dark:text-gray-400">
                 Last Updated:{" "}
                 {lastUpdatedHours !== null
                   ? `${lastUpdatedHours.toFixed(1)} hours ago`
                   : "N/A"}
               </p>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
+              <p className="font-normal text-gray-800 dark:text-gray-400">
                 Is Active: {item.is_active ? "True" : "False"}
               </p>
               <Button className="mt-4" onClick={() => setOpenModal(true)}>
                 Update
               </Button>
               <Modal
-                //dismissible
+                dismissible
                 show={openModal}
                 onClose={() => setOpenModal(false)}
               >

@@ -4,6 +4,7 @@ import {
 } from "../services/instrumentService";
 import { Button, Table } from "flowbite-react";
 import { Link } from "react-router-dom";
+import { HiTrash,HiChartBar } from "react-icons/hi";
 
 export type Instrument = {
   id: number;
@@ -38,11 +39,11 @@ const HomePage = () => {
         <Table striped hoverable>
           <Table.Head>
             <Table.HeadCell>Company Name</Table.HeadCell>
-            <Table.HeadCell>Token</Table.HeadCell>
-            <Table.HeadCell>Instrument</Table.HeadCell>
-            <Table.HeadCell>Exchange</Table.HeadCell>
-            <Table.HeadCell>Expiry</Table.HeadCell>
             <Table.HeadCell>View Graph</Table.HeadCell>
+
+            {/* <Table.HeadCell>Instrument</Table.HeadCell> */}
+            <Table.HeadCell>Exchange</Table.HeadCell>
+            {/* <Table.HeadCell>Expiry</Table.HeadCell> */}
             <Table.HeadCell>Delete</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
@@ -50,24 +51,28 @@ const HomePage = () => {
               data.data.map((instrument: Instrument) => (
                 <Table.Row
                   key={instrument.id}
-                  className="bg-white dark:border-gray-700 dark:bg-gray-800"
+                  className="bg-white dark:border-gray-800 dark:bg-gray-800"
                 >
                   <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                     {instrument.company_name}
                   </Table.Cell>
-                  <Table.Cell>{instrument.token}</Table.Cell>
-                  <Table.Cell>{instrument.instrument}</Table.Cell>
-                  <Table.Cell>{instrument.exchange_code}</Table.Cell>
-                  <Table.Cell>{instrument.expiry}</Table.Cell>
                   <Table.Cell>
                     <Link
                       to={`/graphs/${instrument.id}`}
                       state={{ obj: instrument }} // Pass instrument object in state
                       className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
                     >
-                      View Graph
+                      <Button 
+                      pill
+                      outline gradientDuoTone="tealToLime">
+                        <HiChartBar/>
+                      </Button>
                     </Link>
                   </Table.Cell>
+                  {/*  <Table.Cell>{instrument.instrument}</Table.Cell> */}
+                  <Table.Cell>{instrument.exchange_code}</Table.Cell>
+                  {/* <Table.Cell>{instrument.expiry}</Table.Cell> */}
+
                   <Table.Cell>
                     <Button
                       pill
@@ -75,7 +80,7 @@ const HomePage = () => {
                       gradientDuoTone="pinkToOrange"
                       onClick={() => handleDelete(instrument.id)}
                     >
-                      Delete
+                      <HiTrash />
                     </Button>
                   </Table.Cell>
                 </Table.Row>

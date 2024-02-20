@@ -4,6 +4,7 @@ import {
   useSubscribeInstrumentMutation,
 } from "../services/instrumentService";
 import { Instrument as InstrumentType } from "../common-types";
+import { HiPlus } from "react-icons/hi";
 
 type Props = {
   exchange: string;
@@ -26,7 +27,7 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
   };
 
   return (
-    <div className="w-[70dvw] dark:bg-gray-900 overflow-auto max-h-[70dvh]">
+    <div className="w-[95dvw] dark:bg-gray-900 overflow-auto max-h-[65dvh]">
       <Table striped hoverable>
         <Table.Head>
           <Table.HeadCell>Company Name</Table.HeadCell>
@@ -41,19 +42,19 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
                 key={instrument.id}
                 className="bg-white dark:border-gray-700 dark:bg-gray-800"
               >
-                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                <Table.Cell className=" font-small text-ellipsis text-gray-900 dark:text-white">
                   {instrument.company_name}
                 </Table.Cell>
                 <Table.Cell>{instrument.series}</Table.Cell>
                 <Table.Cell>{instrument.short_name}</Table.Cell>
                 <Table.Cell>
                   <Button
-                    //pill
+                    pill
                     outline
-                    gradientDuoTone="purpleToBlue"
+                    gradientDuoTone="cyanToBlue"
                     onClick={() => handleClick(instrument.id)}
                   >
-                    +
+                    <HiPlus />
                   </Button>
                 </Table.Cell>
               </Table.Row>
