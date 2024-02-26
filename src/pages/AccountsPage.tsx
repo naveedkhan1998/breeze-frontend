@@ -61,7 +61,7 @@ const AccountsPage = () => {
   }, [isSuccess]);
 
   return (
-    <div className="dark:bg-gray-900 h-[94.5dvh] items-baseline justify-around grid p-10">
+    <div className="dark:bg-gray-900 h-screen flex flex-wrap items-center justify-center ">
       {data && (
         <>
           {data.data.map((item: BreezeAccount) => (

@@ -5,11 +5,7 @@ import {
 } from "../services/instrumentService";
 import { Instrument } from "./HomePage";
 import { useLocation } from "react-router-dom";
-import {
-  createChart,
-  CandlestickData,
-  CrosshairMode,
-} from "lightweight-charts";
+import { createChart, CandlestickData } from "lightweight-charts";
 import { formatDate } from "../common-functions";
 import { Dropdown, Spinner, Button } from "flowbite-react";
 import { Candle } from "../common-types";
@@ -44,7 +40,7 @@ const GraphsPage = () => {
     const renderChart = () => {
       if (chartContainerRef.current && data) {
         chartContainerRef.current.innerHTML = "";
-        const chart = createChart(chartContainerRef.current!, {
+        const chart = createChart(chartContainerRef.current, {
           width: window.innerWidth * 0.9,
           height: window.innerHeight * 0.7,
           layout: {
@@ -65,12 +61,37 @@ const GraphsPage = () => {
             timeVisible: true,
             secondsVisible: false,
           },
+          rightPriceScale: {
+            scaleMargins: {
+              top: 0.4, // leave some space for the legend
+              bottom: 0.15,
+            },
+          },
           crosshair: {
-            mode: CrosshairMode.Normal,
+            // hide the horizontal crosshair line
+            horzLine: {
+              visible: false,
+              labelVisible: true,
+            },
+          },
+          // hide the grid lines
+          grid: {
+            vertLines: {
+              visible: true,
+            },
+            horzLines: {
+              visible: true,
+            },
           },
         });
 
-        const series = chart.addCandlestickSeries();
+        const series = chart.addCandlestickSeries({
+          upColor: "#26a69a",
+          downColor: "#ef5350",
+          borderVisible: false,
+          wickUpColor: "#26a69a",
+          wickDownColor: "#ef5350",
+        });
         const seriesData: CandlestickData[] = data.data.map(
           ({ date, open, high, low, close }: Candle) => ({
             time: formatDate(date),
@@ -83,6 +104,34 @@ const GraphsPage = () => {
 
         series.setData(seriesData);
 
+        // Add legend
+        const legendContainer = document.createElement("div");
+        legendContainer.className = `z-10 text-lg font-sans leading-5 font-light bg-slate-200 dark:bg-slate-700 dark:text-white rounded p-2 shadow-md`;
+
+        chartContainerRef.current.insertBefore(
+          legendContainer,
+          chartContainerRef.current.firstChild
+        );
+
+        const legendRow = document.createElement("div");
+        legendRow.innerHTML = `${obj.company_name} | ${obj.exchange_code} | Timeframe: ${timeframe}`;
+
+        legendContainer.appendChild(legendRow);
+
+        chart.subscribeCrosshairMove((param) => {
+          let priceFormatted = "";
+          if (param.time) {
+            const data = param.seriesData.get(series);
+            if (data) {
+              if ("close" in data) {
+                const price = (data as CandlestickData).close;
+                priceFormatted = String(price);
+              }
+            }
+          }
+          legendRow.innerHTML = `${obj.company_name} | ${obj.exchange_code} | Timeframe: ${timeframe} | <strong>${priceFormatted}</strong>`;
+        });
+
         chartRef.current = chart;
       }
     };
@@ -94,7 +143,7 @@ const GraphsPage = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [data,mode]);
+  }, [data, mode]);
 
   const handleTfChange = (tf: number) => {
     setTimeFrame(tf);

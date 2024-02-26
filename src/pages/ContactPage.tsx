@@ -2,7 +2,7 @@ import { Card } from "flowbite-react";
 
 const ContactPage = () => {
   return (
-    <div className="dark:bg-gray-900 h-screen flex items-center justify-center">
+    <div className="dark:bg-gray-900 h-screen flex flex-wrap items-center justify-center">
       <div className="max-w-2xl p-6 bg-white dark:bg-gray-800 rounded-md shadow-lg text-gray-900 dark:text-white">
         <h1 className="text-4xl font-bold mb-6">Get in Touch</h1>
         <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
