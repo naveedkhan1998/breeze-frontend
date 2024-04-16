@@ -1,23 +1,23 @@
-import { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Button, Dropdown, Spinner } from "flowbite-react";
+import { createChart, CandlestickData } from "lightweight-charts";
 import {
   useGetCandlesQuery,
   useLoadInstrumentCandlesMutation,
 } from "../services/instrumentService";
-import { Instrument } from "./HomePage";
-import { useLocation } from "react-router-dom";
-import { createChart, CandlestickData } from "lightweight-charts";
 import { formatDate } from "../common-functions";
-import { Dropdown, Spinner, Button } from "flowbite-react";
 import { Candle } from "../common-types";
 import { useAppSelector } from "../app/hooks";
 import { getMode } from "../features/darkModeSlice";
+import { Instrument } from "./HomePage";
 
-const GraphsPage = () => {
+const GraphsPage: React.FC = () => {
   const location = useLocation();
   const mode = useAppSelector(getMode);
   const { obj }: { obj: Instrument } = location.state;
-  const [timeframe, setTimeFrame] = useState(5); // default tf = 5
-  const { data, refetch, isLoading } = useGetCandlesQuery({
+  const [timeframe, setTimeFrame] = useState<number>(5);
+  const { data, refetch, isLoading, isFetching } = useGetCandlesQuery({
     id: obj.id,
     tf: timeframe,
   });
@@ -44,37 +44,32 @@ const GraphsPage = () => {
           width: window.innerWidth * 0.9,
           height: window.innerHeight * 0.7,
           layout: {
-            textColor:
-              localStorage.getItem("flowbite-theme-mode") === "dark"
-                ? "#FFFFFF"
-                : "#374151",
+            textColor: mode ? "#FFFFFF" : "#191919",
             background: {
-              color:
-                localStorage.getItem("flowbite-theme-mode") === "dark"
-                  ? "#374151"
-                  : "#FFFFFF",
+              color: mode ? "#191919" : "#FFFFFF",
             },
-
-            fontSize: 14,
+            fontSize: 12,
           },
           timeScale: {
             timeVisible: true,
             secondsVisible: false,
           },
           rightPriceScale: {
+            minimumWidth: 1,
+            borderVisible: true,
+            alignLabels: true,
             scaleMargins: {
-              top: 0.4, // leave some space for the legend
+              top: 0.4,
               bottom: 0.15,
             },
           },
           crosshair: {
-            // hide the horizontal crosshair line
+            mode: 0,
             horzLine: {
-              visible: false,
+              visible: true,
               labelVisible: true,
             },
           },
-          // hide the grid lines
           grid: {
             vertLines: {
               visible: true,
@@ -104,9 +99,8 @@ const GraphsPage = () => {
 
         series.setData(seriesData);
 
-        // Add legend
         const legendContainer = document.createElement("div");
-        legendContainer.className = `z-10 text-lg font-sans leading-5 font-light bg-slate-200 dark:bg-slate-700 dark:text-white rounded p-2 shadow-md`;
+        legendContainer.className = `graphlegend`;
 
         chartContainerRef.current.insertBefore(
           legendContainer,
@@ -117,19 +111,27 @@ const GraphsPage = () => {
         legendRow.innerHTML = `${obj.company_name} | ${obj.exchange_code} | Timeframe: ${timeframe}`;
 
         legendContainer.appendChild(legendRow);
+        // Create a new row for OHLC values
+        const ohlcRow = document.createElement("div");
+        ohlcRow.innerHTML = "<strong>OHLC:</strong> ";
+        legendContainer.appendChild(ohlcRow);
 
         chart.subscribeCrosshairMove((param) => {
-          let priceFormatted = "";
+          let ohlcValues = "";
           if (param.time) {
             const data = param.seriesData.get(series);
             if (data) {
               if ("close" in data) {
-                const price = (data as CandlestickData).close;
-                priceFormatted = String(price);
+                const close = (data as CandlestickData).close;
+                const open = (data as CandlestickData).open;
+                const high = (data as CandlestickData).high;
+                const low = (data as CandlestickData).low;
+                ohlcValues = `<strong>O:</strong> ${open} | <strong>H:</strong> ${high} | <strong>L:</strong> ${low} | <strong>C:</strong> ${close}`;
               }
             }
           }
-          legendRow.innerHTML = `${obj.company_name} | ${obj.exchange_code} | Timeframe: ${timeframe} | <strong>${priceFormatted}</strong>`;
+          legendRow.innerHTML = `${obj.company_name} | ${obj.exchange_code} | Timeframe: ${timeframe}`;
+          ohlcRow.innerHTML = `<strong>OHLC:</strong> ${ohlcValues}`;
         });
 
         chartRef.current = chart;
@@ -143,7 +145,7 @@ const GraphsPage = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [data, mode]);
+  }, [data, mode, obj.company_name, obj.exchange_code, timeframe]);
 
   const handleTfChange = (tf: number) => {
     setTimeFrame(tf);
@@ -153,20 +155,19 @@ const GraphsPage = () => {
   };
 
   const handleClick = (id: number) => {
-    loadInstrumentCandles({ id: id });
+    loadInstrumentCandles({ id });
     refetch();
-    //console.log(id);
   };
 
   return (
-    <div className="dark:bg-gray-900 h-[94.5dvh] items-center flex justify-center flex-col">
-      {isLoading ? (
+    <div className="flex flex-col items-center justify-start min-h-screen m-auto overflow-auto dark:bg-gray-900 h-fit">
+      {isLoading || isFetching ? (
         <div className="text-center">
-          <Spinner size="xl" aria-label="Center-aligned spinner example" />
+          <Spinner className="flex m-auto size-60" />
         </div>
       ) : (
         <>
-          <div className="dark:text-white flex flex-wrap gap-2">
+          <div className="z-20 p-6 dark:text-white">
             <Button.Group outline>
               <Button>{obj.company_name}</Button>
               <Button>{obj.exchange_code}</Button>
@@ -206,7 +207,10 @@ const GraphsPage = () => {
               <Button onClick={() => handleClick(obj.id)}>Load Candles</Button>
             </Button.Group>
           </div>
-          <div ref={chartContainerRef}></div>
+          <div
+            ref={chartContainerRef}
+            className="flex flex-col items-center justify-center rounded ring-1"
+          ></div>
         </>
       )}
     </div>

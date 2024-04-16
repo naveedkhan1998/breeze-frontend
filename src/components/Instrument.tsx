@@ -1,10 +1,12 @@
 import { Button, Table } from "flowbite-react";
 import {
   useGetInstrumentsQuery,
+  useGetSubscribedInstrumentsQuery,
   useSubscribeInstrumentMutation,
 } from "../services/instrumentService";
 import { Instrument as InstrumentType } from "../common-types";
 import { HiPlus } from "react-icons/hi";
+import { toast } from "react-toastify";
 
 type Props = {
   exchange: string;
@@ -15,19 +17,22 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
   const exc = exchange;
   const search = searchTerm;
   const [subscribeInstrument] = useSubscribeInstrumentMutation();
+  const { refetch } = useGetSubscribedInstrumentsQuery("");
 
   const { data } = useGetInstrumentsQuery({
     exchange: exc,
     search: search,
   });
 
-  const handleClick = (id: number) => {
-    subscribeInstrument({ id: id });
+  const handleClick = async (id: number) => {
+    await subscribeInstrument({ id: id });
+    await refetch();
+    toast.success("Instrument Subscribed");
     //console.log(id);
   };
 
   return (
-    <div className="w-[95dvw] dark:bg-gray-900 overflow-auto max-h-[65dvh]">
+    <div className="w-[95dvw] dark:bg-gray-900 ">
       <Table striped hoverable>
         <Table.Head>
           <Table.HeadCell>Company Name</Table.HeadCell>
@@ -42,7 +47,7 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
                 key={instrument.id}
                 className="bg-white dark:border-gray-700 dark:bg-gray-800"
               >
-                <Table.Cell className=" font-small text-ellipsis text-gray-900 dark:text-white">
+                <Table.Cell className="text-gray-900 font-small text-ellipsis dark:text-white">
                   {instrument.company_name}
                 </Table.Cell>
                 <Table.Cell>{instrument.series}</Table.Cell>

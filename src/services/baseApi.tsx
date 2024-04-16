@@ -1,8 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+const isLocalhost = localStorage.getItem("isLocalhost");
+
+const baseUrl = isLocalhost
+  ? "http://localhost:5000"
+  : "https://dtemplarsarsh.pythonanywhere.com";
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://dtemplarsarsh.pythonanywhere.com",
-  //baseUrl: "http://localhost:5000",
+  baseUrl,
   //credentials: "include",
 });
 

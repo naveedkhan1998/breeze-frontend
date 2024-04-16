@@ -4,7 +4,7 @@
 
 body {
   font-family: "League Spartan", sans-serif;
-  background-color: #E4E5F1;
+  background-color: #e4e5f1;
 }
 ::-webkit-scrollbar {
   width: 5px;
@@ -22,4 +22,8 @@ body {
 
 .scrollbar-hidden::-webkit-scrollbar-thumb {
   background-color: transparent;
+}
+
+.graphlegend {
+  @apply relative z-10 items-start p-2 -mt-16 rounded shadow-xl bg-white/60 dark:bg-black/60 dark:text-white top-16;
 }

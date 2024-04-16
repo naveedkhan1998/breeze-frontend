@@ -1,12 +1,12 @@
-import React from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React from "react";
+import { ToastContainer,ToastOptions } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Toast: React.FC = () => {
-
-  const toastOptions = {
+  const toastOptions:ToastOptions = {
     autoClose: 1500,
-    //position: "bottom-right",
+    theme: "colored",
+    position: "bottom-right",
   };
 
   return <ToastContainer {...toastOptions} />;

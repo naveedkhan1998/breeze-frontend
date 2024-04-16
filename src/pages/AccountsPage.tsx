@@ -58,10 +58,10 @@ const AccountsPage = () => {
 
       setLastUpdatedHours(timeDifferenceInHours);
     }
-  }, [isSuccess]);
+  }, [isSuccess, data]);
 
   return (
-    <div className="dark:bg-gray-900 h-screen flex flex-wrap items-center justify-center ">
+    <div className="flex flex-col items-center justify-center h-screen m-auto dark:bg-gray-900 ">
       {data && (
         <>
           {data.data.map((item: BreezeAccount) => (
@@ -69,7 +69,7 @@ const AccountsPage = () => {
               key={item.id}
               className="w-[60dvw] bg-white dark:bg-gray-800 shadow-md rounded-md p-4 space-y-4"
             >
-              <h5 className="text-2xl font-serif font-bold tracking-tight text-gray-900 dark:text-white">
+              <h5 className="font-serif text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Account Name: {item.name}
               </h5>
               <p className="font-normal text-gray-800 dark:text-gray-400">
@@ -112,7 +112,7 @@ const AccountsPage = () => {
                     </Button>
 
                     <FloatingLabel
-                      className=" "
+                      className=""
                       variant="standard"
                       label="Session Token"
                       id="sessionToken"

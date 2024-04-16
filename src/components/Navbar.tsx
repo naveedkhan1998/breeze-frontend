@@ -23,19 +23,17 @@ const Navbar = () => {
   };
 
   return (
-    <FlowbiteNavbar fluid>
+    <FlowbiteNavbar
+      fluid
+      className="sticky top-0 z-30 shadow-2xl dark:shadow-white/10"
+    >
       <FlowbiteNavbar.Brand href="#">
-        <img
-          src="/vite.svg"
-          className="mr-3 h-6 sm:h-9"
-          alt="Flowbite React Logo"
-        />
-        <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
+        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
           ICICI Breeze
         </span>
       </FlowbiteNavbar.Brand>
       <div className="flex md:order-2">
-        <DarkThemeToggle onClickCapture={handleClick} className=" mr-2" />
+        <DarkThemeToggle onClickCapture={handleClick} className="mr-2 " />
         <FlowbiteNavbar.Toggle />
         <Dropdown
           arrowIcon={false}
@@ -50,7 +48,7 @@ const Navbar = () => {
         >
           <Dropdown.Header>
             <span className="block text-sm">Naveed Khan</span>
-            <span className="block truncate text-sm font-medium">
+            <span className="block text-sm font-medium truncate">
               admin@gmail.com
             </span>
           </Dropdown.Header>
@@ -65,35 +63,35 @@ const Navbar = () => {
         <FlowbiteNavbar.Link
           as={Link}
           to="/"
-          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
         >
           Home
         </FlowbiteNavbar.Link>
         <FlowbiteNavbar.Link
           as={Link}
           to="/instruments"
-          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
         >
           Instruments
         </FlowbiteNavbar.Link>
         <FlowbiteNavbar.Link
           as={Link}
           to="/accounts"
-          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
         >
           Accounts
         </FlowbiteNavbar.Link>
         <FlowbiteNavbar.Link
           as={Link}
           to="/about"
-          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
         >
           About
         </FlowbiteNavbar.Link>
         <FlowbiteNavbar.Link
           as={Link}
           to="/contact"
-          className=" dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500 transition-colors delay-200"
+          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
         >
           Contact
         </FlowbiteNavbar.Link>
