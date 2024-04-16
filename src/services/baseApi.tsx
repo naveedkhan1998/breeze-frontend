@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const isLocalhost = localStorage.getItem("isLocalhost");
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 
 const baseUrl = isLocalhost
   ? "http://localhost:5000"
