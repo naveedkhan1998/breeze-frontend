@@ -16,7 +16,7 @@ const GraphsPage: React.FC = () => {
   const location = useLocation();
   const mode = useAppSelector(getMode);
   const { obj }: { obj: Instrument } = location.state;
-  const [timeframe, setTimeFrame] = useState<number>(5);
+  const [timeframe, setTimeFrame] = useState<number>(30);
   const { data, refetch, isLoading, isFetching } = useGetCandlesQuery({
     id: obj.id,
     tf: timeframe,
