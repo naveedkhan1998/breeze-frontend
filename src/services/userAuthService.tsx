@@ -1,4 +1,3 @@
-
 import { baseApi } from "./baseApi";
 
 export const userAuthApi = baseApi.injectEndpoints({
@@ -8,6 +7,7 @@ export const userAuthApi = baseApi.injectEndpoints({
         url: "/account/login/",
         method: "POST",
         body: { ...credentials },
+        credentials: "omit",
       }),
     }),
     registerUser: builder.mutation({
@@ -19,6 +19,7 @@ export const userAuthApi = baseApi.injectEndpoints({
           headers: {
             "Content-type": "application/json",
           },
+          credentials: "omit",
         };
       },
     }),
@@ -28,7 +29,7 @@ export const userAuthApi = baseApi.injectEndpoints({
           url: "/account/me",
           method: "GET",
           headers: {
-            'x-account-token': `${access_token}`,
+            "x-account-token": `${access_token}`,
           },
         };
       },
@@ -42,12 +43,12 @@ export const userAuthApi = baseApi.injectEndpoints({
       },
     }),
     sendEmail: builder.query({
-      query: ({access_token}) => {
+      query: ({ access_token }) => {
         return {
           url: "/account/invoke_verify_email",
           method: "GET",
           headers: {
-            'x-account-token': `${access_token}`,
+            "x-account-token": `${access_token}`,
           },
         };
       },
@@ -55,10 +56,4 @@ export const userAuthApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {
-  useRegisterUserMutation,
-  useLoginUserMutation,
-  useGetLoggedUserQuery,
-  useGoogleLoginQuery,
-  useLazySendEmailQuery
-} = userAuthApi;
+export const { useRegisterUserMutation, useLoginUserMutation, useGetLoggedUserQuery, useGoogleLoginQuery, useLazySendEmailQuery } = userAuthApi;

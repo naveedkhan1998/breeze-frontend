@@ -1,17 +1,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getToken } from "./auth";
 
-const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
+const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 //https://dtemplarsarsh.pythonanywhere.com
-const baseUrl = isLocalhost
-  ? "http://localhost:5000"
-  : "https://breeze-backend-m3o6.onrender.com";
+const baseUrl = isLocalhost ? "http://localhost:5000" : "https://breeze-backend-m3o6.onrender.com";
 
 const baseQuery = fetchBaseQuery({
   baseUrl,
-  //credentials: "include",
+  // credentials: "include",
+  prepareHeaders: (headers) => {
+    const token = getToken();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
 });
 
 export const baseApi = createApi({

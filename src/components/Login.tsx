@@ -6,6 +6,7 @@ import { setCredentials } from "../features/authSlice";
 import { storeToken } from "../services/LocalStorageService";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { toast } from "react-toastify";
+import { setToken } from "../services/auth";
 
 interface FormData {
   email: string;
@@ -37,6 +38,7 @@ const Login = () => {
     if (isSuccess) {
       if ("data" in res) {
         const token: Token = res.data.token;
+        setToken(token.access);
         storeToken({ value: { access: token.access } });
         dispatch(setCredentials({ access: token.access }));
         toast.success("Logged In");
@@ -46,31 +48,12 @@ const Login = () => {
     }
   };
   return (
-    <form
-      className="flex flex-col gap-6  justify-center w-[80dvw] sm:w-[50dvw] min-h-[70dvh]"
-      onSubmit={handleSubmit}
-    >
+    <form className="flex flex-col gap-6  justify-center w-[80dvw] sm:w-[50dvw] min-h-[70dvh]" onSubmit={handleSubmit}>
       <div>
-        <FloatingLabel
-          variant="standard"
-          label="Email"
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+        <FloatingLabel variant="standard" label="Email" id="email" type="email" value={formData.email} onChange={handleChange} required />
       </div>
       <div>
-        <FloatingLabel
-          variant="standard"
-          label="Password"
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        <FloatingLabel variant="standard" label="Password" id="password" type="password" value={formData.password} onChange={handleChange} required />
       </div>
 
       <Button type="submit">Login</Button>

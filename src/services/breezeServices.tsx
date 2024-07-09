@@ -13,10 +13,20 @@ export const breezeApi = baseApi.injectEndpoints({
         };
       },
     }),
+    createBreeze: builder.mutation({
+      query: ( data ) => ({
+        url: "core/breeze/",
+        method: "POST",
+        body: data,
+        headers: {
+          "Content-type": "application/json",
+        },
+      }),
+    }),
     updateBreeze: builder.mutation({
       query: ({ data }) => ({
         url: "core/breeze/",
-        method: "POST",
+        method: "PUT",
         body: data,
         headers: {
           "Content-type": "application/json",
@@ -26,4 +36,4 @@ export const breezeApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetBreezeQuery, useUpdateBreezeMutation } = breezeApi;
+export const { useGetBreezeQuery, useUpdateBreezeMutation, useCreateBreezeMutation } = breezeApi;

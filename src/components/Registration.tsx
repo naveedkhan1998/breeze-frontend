@@ -6,6 +6,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { storeToken } from "../services/LocalStorageService";
 import { setCredentials } from "../features/authSlice";
 import { toast } from "react-toastify";
+import { setToken } from "../services/auth";
 
 interface FormData {
   name: string;
@@ -29,7 +30,7 @@ const Registration = () => {
     email: "",
     password: "",
     password2: "",
-    tc: false,
+    tc: true,
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +53,7 @@ const Registration = () => {
     if (isSuccess) {
       if ("data" in res) {
         const token: Token = res.data.token;
+        setToken(token.access);
         storeToken({ value: { access: token.access } });
         dispatch(setCredentials({ access: token.access }));
         toast.success("Logged In");
@@ -61,67 +63,24 @@ const Registration = () => {
     }
   };
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-6 justify-center w-[80dvw] sm:w-[50dvw] min-h-[70dvh]"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 justify-center w-[80dvw] sm:w-[50dvw] min-h-[70dvh]">
       <div>
-        <FloatingLabel
-          variant="standard"
-          label="Full Name"
-          id="name"
-          type="text"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+        <FloatingLabel variant="standard" label="Full Name" id="name" type="text" value={formData.name} onChange={handleChange} required />
       </div>
       <div>
-        <FloatingLabel
-          variant="standard"
-          label="Email"
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+        <FloatingLabel variant="standard" label="Email" id="email" type="email" value={formData.email} onChange={handleChange} required />
       </div>
       <div>
-        <FloatingLabel
-          variant="standard"
-          label="Password"
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        <FloatingLabel variant="standard" label="Password" id="password" type="password" value={formData.password} onChange={handleChange} required />
       </div>
       <div>
-        <FloatingLabel
-          variant="standard"
-          label="Repeat Password"
-          id="password2"
-          type="password"
-          value={formData.password2}
-          onChange={handleChange}
-          required
-        />
+        <FloatingLabel variant="standard" label="Repeat Password" id="password2" type="password" value={formData.password2} onChange={handleChange} required />
       </div>
       <div className="flex items-center gap-2">
-        <Checkbox
-          id="tc"
-          value={formData.tc ? "true" : "false"}
-          onChange={handleChange}
-          required
-        />
+        <Checkbox id="tc" value={formData.tc ? "true" : "false"} onChange={handleChange} required />
         <Label htmlFor="agree" className="flex">
           I agree with the&nbsp;
-          <a
-            href="#"
-            className="text-cyan-600 hover:underline dark:text-cyan-500"
-          >
+          <a href="#" className="text-cyan-600 hover:underline dark:text-cyan-500">
             terms and conditions
           </a>
         </Label>

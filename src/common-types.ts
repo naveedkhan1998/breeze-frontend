@@ -41,4 +41,5 @@ export interface BreezeAccount {
   session_token: string;
   last_updated: string;
   is_active: boolean;
+  user: number;
 }

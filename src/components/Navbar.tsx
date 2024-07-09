@@ -10,6 +10,7 @@ const Navbar = () => {
   const dispatch = useAppDispatch();
   const signOut = () => {
     removeToken();
+    removeToken();
     dispatch(logOut());
     toast.success("Logged Out");
   };
@@ -23,34 +24,17 @@ const Navbar = () => {
   };
 
   return (
-    <FlowbiteNavbar
-      fluid
-      className="sticky top-0 z-30 shadow-2xl dark:shadow-white/10"
-    >
+    <FlowbiteNavbar fluid className="sticky top-0 z-30 shadow-2xl dark:shadow-white/10">
       <FlowbiteNavbar.Brand href="#">
-        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
-          ICICI Breeze
-        </span>
+        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">ICICI Breeze</span>
       </FlowbiteNavbar.Brand>
       <div className="flex md:order-2">
         <DarkThemeToggle onClickCapture={handleClick} className="mr-2 " />
         <FlowbiteNavbar.Toggle />
-        <Dropdown
-          arrowIcon={false}
-          inline
-          label={
-            <Avatar
-              alt="User settings"
-              img="https://ui-avatars.com/api/?name=Naveed+Khan"
-              rounded
-            />
-          }
-        >
+        <Dropdown arrowIcon={false} inline label={<Avatar alt="User settings" img="https://ui-avatars.com/api/?name=Naveed+Khan" rounded />}>
           <Dropdown.Header>
             <span className="block text-sm">Naveed Khan</span>
-            <span className="block text-sm font-medium truncate">
-              admin@gmail.com
-            </span>
+            <span className="block text-sm font-medium truncate">admin@gmail.com</span>
           </Dropdown.Header>
           <Dropdown.Item>Dashboard</Dropdown.Item>
           <Dropdown.Item>Settings</Dropdown.Item>
@@ -60,39 +44,19 @@ const Navbar = () => {
         </Dropdown>
       </div>
       <FlowbiteNavbar.Collapse>
-        <FlowbiteNavbar.Link
-          as={Link}
-          to="/"
-          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
-        >
+        <FlowbiteNavbar.Link as={Link} to="/" className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500">
           Home
         </FlowbiteNavbar.Link>
-        <FlowbiteNavbar.Link
-          as={Link}
-          to="/instruments"
-          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
-        >
+        <FlowbiteNavbar.Link as={Link} to="/instruments" className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500">
           Instruments
         </FlowbiteNavbar.Link>
-        <FlowbiteNavbar.Link
-          as={Link}
-          to="/accounts"
-          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
-        >
+        <FlowbiteNavbar.Link as={Link} to="/accounts" className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500">
           Accounts
         </FlowbiteNavbar.Link>
-        <FlowbiteNavbar.Link
-          as={Link}
-          to="/about"
-          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
-        >
+        <FlowbiteNavbar.Link as={Link} to="/about" className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500">
           About
         </FlowbiteNavbar.Link>
-        <FlowbiteNavbar.Link
-          as={Link}
-          to="/contact"
-          className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500"
-        >
+        <FlowbiteNavbar.Link as={Link} to="/contact" className="transition-colors delay-200 dark:text-white hover:text-cyan-500 dark:hover:text-cyan-500">
           Contact
         </FlowbiteNavbar.Link>
       </FlowbiteNavbar.Collapse>
