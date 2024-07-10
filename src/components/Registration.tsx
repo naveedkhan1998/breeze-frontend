@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { useAppDispatch } from "../app/hooks";
 import { useRegisterUserMutation } from "../services/userAuthService";
