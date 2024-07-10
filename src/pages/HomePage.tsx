@@ -6,49 +6,72 @@ import { useDeleteInstrumentMutation, useGetSubscribedInstrumentsQuery } from ".
 import { toast } from "react-toastify";
 
 // Define the Instrument interface
+export interface PercentageInstrument {
+  percentage: number;
+  is_loading: boolean;
+}
+
 export interface Instrument {
   id: number;
-  stock_token: string;
-  token: string;
+  percentage: PercentageInstrument[];
+  stock_token: string | null;
+  token: string | null;
   instrument: string | null;
-  short_name: string;
-  series: string;
-  company_name: string;
+  short_name: string | null;
+  series: string | null;
+  company_name: string | null;
   expiry: string | null;
-  strike_price: number;
+  strike_price: number | null;
   option_type: string | null;
-  exchange_code: string;
+  exchange_code: string | null;
   exchange: number;
 }
+
 const InstrumentTable: React.FC<{
   instruments: Instrument[];
-  onDelete: (id: number, company_name: string) => void;
-}> = ({ instruments, onDelete }) => {
+  onDelete: (id: number) => void;
+  deletingRowIds: number[];
+}> = ({ instruments, onDelete, deletingRowIds }) => {
   return (
     <div className="overflow-x-auto">
       <Table striped hoverable>
         <Table.Head>
-          <Table.HeadCell>Company Name</Table.HeadCell>
-          <Table.HeadCell>View Graph</Table.HeadCell>
-          <Table.HeadCell>Delete</Table.HeadCell>
+          <Table.HeadCell className="px-6 py-3">Company Name</Table.HeadCell>
+          <Table.HeadCell className="px-6 py-3">Progress</Table.HeadCell>
+          <Table.HeadCell className="px-6 py-3">Actions</Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           {instruments.map((instrument) => (
-            <Table.Row key={instrument.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-              <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">{instrument.company_name}</Table.Cell>
-              <Table.Cell>
-                <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }}>
-                  <Button size="sm" gradientDuoTone="tealToLime">
-                    <HiChartBar className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">View</span>
-                  </Button>
-                </Link>
+            <Table.Row key={instrument.id} className={`bg-white dark:border-gray-700 dark:bg-gray-800 ${deletingRowIds.includes(instrument.id) ? "opacity-50 cursor-wait" : ""}`}>
+              <Table.Cell className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{instrument.company_name}</Table.Cell>
+              <Table.Cell className="px-6 py-4">
+                {instrument.percentage.length > 0 ? (
+                  instrument.percentage.map((p, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${p.percentage}%` }}></div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{p.percentage.toFixed(2)}%</span>
+                      {p.is_loading ? null : <Spinner size="sm" />}
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-500 dark:text-gray-400">No data</span>
+                )}
               </Table.Cell>
-              <Table.Cell>
-                <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id, instrument.company_name)}>
-                  <HiTrash className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
+              <Table.Cell className="px-6 py-4">
+                <div className="flex space-x-2">
+                  <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }}>
+                    <Button size="sm" gradientDuoTone="tealToLime">
+                      <HiChartBar className="w-4 h-4 mr-2" />
+                      View Graph
+                    </Button>
+                  </Link>
+                  <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)}>
+                    <HiTrash className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
               </Table.Cell>
             </Table.Row>
           ))}
@@ -62,9 +85,11 @@ const InstrumentTable: React.FC<{
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery("");
   const [deleteInstrument] = useDeleteInstrumentMutation();
+  const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
   const [isHealthChecking, setIsHealthChecking] = useState(false);
 
   const handleDelete = async (id: number) => {
+    setDeletingRowIds((prevIds) => [...prevIds, id]);
     try {
       await deleteInstrument({ id });
       await refetch();
@@ -72,6 +97,8 @@ const HomePage: React.FC = () => {
     } catch (error) {
       console.error("Error deleting instrument:", error);
       toast.error("Failed to delete instrument");
+    } finally {
+      setDeletingRowIds((prevIds) => prevIds.filter((rowId) => rowId !== id));
     }
   };
 
@@ -132,21 +159,37 @@ const HomePage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage.length > 0 && instrument.percentage.every((p) => p.is_loading));
+
+      if (!allLoaded) {
+        await refetch();
+      } else {
+        clearInterval(interval);
+      }
+    }, 4000); // 4 seconds
+
+    return () => clearInterval(interval);
+  }, [data, refetch]);
+
   return (
-    <div className="flex flex-col items-center w-full min-h-screen p-2 bg-gray-100 dark:bg-gray-900 sm:p-4">
-      <Card className="w-full max-w-5xl mt-4 mb-4 sm:mt-8 sm:mb-8">
-        <h1 className="mb-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">Subscribed Instruments</h1>
-        <div className="flex flex-col items-start justify-between mb-4 space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
-          <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full sm:w-auto">
-            <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
-            {isHealthChecking ? "Checking..." : "Check Worker Health"}
-          </Button>
-          <Button onClick={() => refetch()} color="light" size="sm" className="w-full sm:w-auto">
-            Refresh Data
-          </Button>
+    <div className="flex flex-col items-center w-full min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-6xl mt-8 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Subscribed Instruments</h1>
+          <div className="flex space-x-2">
+            <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm">
+              <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
+              {isHealthChecking ? "Checking..." : "Check Worker Health"}
+            </Button>
+            <Button onClick={() => refetch()} color="light" size="sm">
+              Refresh Data
+            </Button>
+          </div>
         </div>
         {data ? (
-          <InstrumentTable instruments={data.data} onDelete={handleDelete} />
+          <InstrumentTable instruments={data.data} onDelete={handleDelete} deletingRowIds={deletingRowIds} />
         ) : (
           <div className="flex items-center justify-center h-64">
             <Spinner size="xl" />
