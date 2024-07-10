@@ -24,13 +24,10 @@ export const userAuthApi = baseApi.injectEndpoints({
       },
     }),
     getLoggedUser: builder.query({
-      query: (access_token) => {
+      query: () => {
         return {
-          url: "/account/me",
+          url: "/account/profile",
           method: "GET",
-          headers: {
-            "x-account-token": `${access_token}`,
-          },
         };
       },
     }),
@@ -43,13 +40,10 @@ export const userAuthApi = baseApi.injectEndpoints({
       },
     }),
     sendEmail: builder.query({
-      query: ({ access_token }) => {
+      query: () => {
         return {
           url: "/account/invoke_verify_email",
           method: "GET",
-          headers: {
-            "x-account-token": `${access_token}`,
-          },
         };
       },
     }),

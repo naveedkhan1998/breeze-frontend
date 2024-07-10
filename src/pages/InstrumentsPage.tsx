@@ -1,46 +1,34 @@
-import { FloatingLabel, Tabs } from "flowbite-react";
 import { ChangeEvent, useState } from "react";
+import { TextInput, Tabs, Card } from "flowbite-react";
+import { HiSearch } from "react-icons/hi";
 import Instrument from "../components/Instrument";
 
 const InstrumentsPage = () => {
-  const [searchData, setSearchData] = useState({
-    searchTerm: "",
-  });
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setSearchData((prevData) => ({ ...prevData, [id]: value }));
+    setSearchTerm(e.target.value);
   };
 
   return (
-    <div className="min-h-screen h-fit dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center pt-10 pb-32 rounded-xl">
-        <div className="sticky z-10 top-20">
-          {/* Adjust top value based on the height of your navbar */}
-          <FloatingLabel
-            className="w-[95dvw] "
-            variant="standard"
-            label="Search"
-            id="searchTerm"
-            type="text"
-            value={searchData.searchTerm}
-            onChange={handleChange}
-            required
-          />
+    <div className="min-h-screen p-2 bg-gray-100 dark:bg-gray-900 sm:p-4">
+      <Card className="w-full max-w-6xl mx-auto mt-4 sm:mt-8">
+        <h1 className="mb-4 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">Instruments</h1>
+        <div className="sticky z-10 p-4 mb-4 bg-white rounded-lg shadow-md top-20 dark:bg-gray-800">
+          <TextInput id="searchTerm" type="text" icon={HiSearch} placeholder="Search instruments..." value={searchTerm} onChange={handleChange} required />
         </div>
-        <Tabs aria-label="Default tabs" style="fullWidth">
+        <Tabs aria-label="Instrument tabs" style="underline" className="w-full">
           <Tabs.Item active title="NSE">
-            <Instrument exchange="NSE" searchTerm={searchData.searchTerm} />
+            <Instrument exchange="NSE" searchTerm={searchTerm} />
           </Tabs.Item>
           <Tabs.Item title="BSE">
-            <Instrument exchange="BSE" searchTerm={searchData.searchTerm} />
+            <Instrument exchange="BSE" searchTerm={searchTerm} />
           </Tabs.Item>
           <Tabs.Item title="NFO">
-            <Instrument exchange="FON" searchTerm={searchData.searchTerm} />{" "}
-            {/* FON is NFO in backend */}
+            <Instrument exchange="FON" searchTerm={searchTerm} />
           </Tabs.Item>
         </Tabs>
-      </div>
+      </Card>
     </div>
   );
 };

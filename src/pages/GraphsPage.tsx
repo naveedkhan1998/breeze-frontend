@@ -1,53 +1,53 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Button, Dropdown, Spinner } from "flowbite-react";
-import { createChart, CandlestickData } from "lightweight-charts";
-import {
-  useGetCandlesQuery,
-  useLoadInstrumentCandlesMutation,
-} from "../services/instrumentService";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button, Dropdown, Spinner, Card } from "flowbite-react";
+import { createChart, CandlestickData, IChartApi } from "lightweight-charts";
+import { useGetCandlesQuery, useLoadInstrumentCandlesMutation } from "../services/instrumentService";
 import { formatDate } from "../common-functions";
 import { Candle } from "../common-types";
 import { useAppSelector } from "../app/hooks";
 import { getMode } from "../features/darkModeSlice";
 import { Instrument } from "./HomePage";
+import { HiArrowLeft, HiRefresh, HiClock } from "react-icons/hi";
 
 const GraphsPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const mode = useAppSelector(getMode);
   const { obj }: { obj: Instrument } = location.state;
-  const [timeframe, setTimeFrame] = useState<number>(30);
+  const [timeframe, setTimeFrame] = useState<number>(60);
   const { data, refetch, isLoading, isFetching } = useGetCandlesQuery({
     id: obj.id,
     tf: timeframe,
   });
 
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
-  const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
+  const chartRef = useRef<IChartApi | null>(null);
 
   const [loadInstrumentCandles] = useLoadInstrumentCandlesMutation();
 
   useEffect(() => {
     const handleResize = () => {
-      if (chartRef.current) {
+      if (chartRef.current && chartContainerRef.current) {
+        const height = window.innerHeight * 0.6;
         chartRef.current.applyOptions({
-          width: window.innerWidth * 0.9,
-          height: window.innerHeight * 0.7,
+          width: chartContainerRef.current.clientWidth,
+          height,
         });
+        chartContainerRef.current.style.height = `${height}px`;
       }
     };
 
     const renderChart = () => {
       if (chartContainerRef.current && data) {
         chartContainerRef.current.innerHTML = "";
+        const height = window.innerHeight * 0.6;
         const chart = createChart(chartContainerRef.current, {
-          width: window.innerWidth * 0.9,
-          height: window.innerHeight * 0.7,
+          width: chartContainerRef.current.clientWidth,
+          height,
           layout: {
             textColor: mode ? "#FFFFFF" : "#191919",
-            background: {
-              color: mode ? "#191919" : "#FFFFFF",
-            },
+            background: { color: mode ? "#1F2937" : "#F3F4F6" },
             fontSize: 12,
           },
           timeScale: {
@@ -55,16 +55,15 @@ const GraphsPage: React.FC = () => {
             secondsVisible: false,
           },
           rightPriceScale: {
-            minimumWidth: 1,
-            borderVisible: true,
-            alignLabels: true,
-            scaleMargins: {
-              top: 0.4,
-              bottom: 0.15,
-            },
+            borderColor: mode ? "#374151" : "#D1D5DB",
           },
           crosshair: {
             mode: 0,
+            vertLine: {
+              width: 1,
+              color: mode ? "#4B5563" : "#9CA3AF",
+              style: 1,
+            },
             horzLine: {
               visible: true,
               labelVisible: true,
@@ -72,48 +71,45 @@ const GraphsPage: React.FC = () => {
           },
           grid: {
             vertLines: {
-              visible: true,
+              color: mode ? "#374151" : "#E5E7EB",
             },
             horzLines: {
-              visible: true,
+              color: mode ? "#374151" : "#E5E7EB",
             },
           },
         });
 
         const series = chart.addCandlestickSeries({
-          upColor: "#26a69a",
-          downColor: "#ef5350",
+          upColor: "#10B981",
+          downColor: "#EF4444",
           borderVisible: false,
-          wickUpColor: "#26a69a",
-          wickDownColor: "#ef5350",
+          wickUpColor: "#10B981",
+          wickDownColor: "#EF4444",
         });
-        const seriesData: CandlestickData[] = data.data.map(
-          ({ date, open, high, low, close }: Candle) => ({
-            time: formatDate(date),
-            open,
-            high,
-            low,
-            close,
-          })
-        );
+
+        const seriesData: CandlestickData[] = data.data.map(({ date, open, high, low, close }: Candle) => ({
+          time: formatDate(date),
+          open,
+          high,
+          low,
+          close,
+        }));
 
         series.setData(seriesData);
 
         const legendContainer = document.createElement("div");
-        legendContainer.className = `graphlegend`;
+        legendContainer.className = `absolute top-4 left-4 bg-white dark:bg-gray-800 dark:text-white p-2 rounded shadow-md text-sm z-10`;
 
-        chartContainerRef.current.insertBefore(
-          legendContainer,
-          chartContainerRef.current.firstChild
-        );
+        chartContainerRef.current.appendChild(legendContainer);
 
         const legendRow = document.createElement("div");
+        legendRow.className = "mb-1 font-semibold";
         legendRow.innerHTML = `${obj.company_name} | ${obj.exchange_code} | Timeframe: ${timeframe}`;
 
-        legendContainer.appendChild(legendRow);
-        // Create a new row for OHLC values
         const ohlcRow = document.createElement("div");
         ohlcRow.innerHTML = "<strong>OHLC:</strong> ";
+
+        legendContainer.appendChild(legendRow);
         legendContainer.appendChild(ohlcRow);
 
         chart.subscribeCrosshairMove((param) => {
@@ -126,7 +122,7 @@ const GraphsPage: React.FC = () => {
                 const open = (data as CandlestickData).open;
                 const high = (data as CandlestickData).high;
                 const low = (data as CandlestickData).low;
-                ohlcValues = `<strong>O:</strong> ${open} | <strong>H:</strong> ${high} | <strong>L:</strong> ${low} | <strong>C:</strong> ${close}`;
+                ohlcValues = `<strong>O:</strong> ${open.toFixed(2)} | <strong>H:</strong> ${high.toFixed(2)} | <strong>L:</strong> ${low.toFixed(2)} | <strong>C:</strong> ${close.toFixed(2)}`;
               }
             }
           }
@@ -139,7 +135,6 @@ const GraphsPage: React.FC = () => {
     };
 
     renderChart();
-
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -160,33 +155,31 @@ const GraphsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen m-auto overflow-auto dark:bg-gray-900 h-fit">
-      {isLoading || isFetching ? (
-        <div className="text-center">
-          <Spinner className="flex m-auto size-60" />
+    <div className="flex flex-col items-center justify-start min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-7xl">
+        <div className="flex items-center justify-between mb-4">
+          <Button color="light" onClick={() => navigate(-1)}>
+            <HiArrowLeft className="w-5 h-5 mr-2" /> Back
+          </Button>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{obj.company_name} Chart</h2>
+          <Button color="light" onClick={() => refetch()}>
+            <HiRefresh className="w-5 h-5 mr-2" /> Refresh
+          </Button>
         </div>
-      ) : (
-        <>
-          <div className="z-20 p-6 dark:text-white">
-            <Button.Group outline>
-              <Button>{obj.company_name}</Button>
-              <Button>{obj.exchange_code}</Button>
-              <Button>Timeframe: {timeframe}</Button>
-            </Button.Group>
-            <Button.Group>
-              <Dropdown label="Set TimeFrame" size="sm">
-                <Dropdown.Item onClick={() => handleTfChange(5)}>
-                  5
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => handleTfChange(10)}>
-                  10
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => handleTfChange(15)}>
-                  15
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => handleTfChange(30)}>
-                  30
-                </Dropdown.Item>
+
+        {isLoading || isFetching ? (
+          <div className="flex items-center justify-center h-96">
+            <Spinner size="xl" />
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Dropdown label={`Timeframe: ${timeframe}`} size="sm" className="z-50">
+                {[5, 10, 15, 30].map((tf) => (
+                  <Dropdown.Item key={tf} onClick={() => handleTfChange(tf)}>
+                    {tf}
+                  </Dropdown.Item>
+                ))}
                 <Dropdown.Divider />
                 <Dropdown.Item
                   onClick={() => {
@@ -204,15 +197,14 @@ const GraphsPage: React.FC = () => {
                   Custom +
                 </Dropdown.Item>
               </Dropdown>
-              <Button onClick={() => handleClick(obj.id)}>Load Candles</Button>
-            </Button.Group>
-          </div>
-          <div
-            ref={chartContainerRef}
-            className="flex flex-col items-center justify-center rounded ring-1"
-          ></div>
-        </>
-      )}
+              <Button size="sm" onClick={() => handleClick(obj.id)}>
+                <HiClock className="w-4 h-4 mr-2" /> Load Candles
+              </Button>
+            </div>
+            <div ref={chartContainerRef} className="relative w-full overflow-hidden rounded-lg"></div>
+          </>
+        )}
+      </Card>
     </div>
   );
 };

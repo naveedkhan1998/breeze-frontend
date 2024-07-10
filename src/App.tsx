@@ -10,12 +10,22 @@ import HomePage from "./pages/HomePage";
 import InstrumentsPage from "./pages/InstrumentsPage";
 import LoginRegPage from "./pages/LoginRegPage";
 import { Flowbite } from "flowbite-react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage";
-import { useEffect } from "react";
+import { useEffect, ReactElement } from "react";
 
-const App = () => {
+// Define the props for PrivateRoute
+interface PrivateRouteProps {
+  element: ReactElement;
+}
+
+// PrivateRoute component to protect routes
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   const access_token = useAppSelector(getCurrentToken);
+  return access_token ? element : <Navigate to="/login" />;
+};
+
+const App: React.FC = () => {
   useEffect(() => {
     // Function to check if running on localhost or production
     const checkEnvironment = () => {
@@ -26,23 +36,21 @@ const App = () => {
     // Call the function on page load
     checkEnvironment();
   }, []);
+
   return (
     <BrowserRouter>
       <Flowbite>
         <Navbar />
         <Routes>
-          <Route
-            path="/"
-            element={access_token ? <HomePage /> : <LoginRegPage />} //LoginRegPage
-          />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/instruments" element={<InstrumentsPage />} />
-          <Route path="/graphs/:id" element={<GraphsPage />} />
-          <Route path="/accounts" element={<AccountsPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
+          <Route path="/about" element={<PrivateRoute element={<AboutPage />} />} />
+          <Route path="/instruments" element={<PrivateRoute element={<InstrumentsPage />} />} />
+          <Route path="/graphs/:id" element={<PrivateRoute element={<GraphsPage />} />} />
+          <Route path="/accounts" element={<PrivateRoute element={<AccountsPage />} />} />
+          <Route path="/contact" element={<PrivateRoute element={<ContactPage />} />} />
+          <Route path="/login" element={<LoginRegPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-
         <Toast />
       </Flowbite>
     </BrowserRouter>
