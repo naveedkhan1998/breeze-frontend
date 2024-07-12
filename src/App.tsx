@@ -28,7 +28,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
 };
 
 const App: React.FC = () => {
-  const { isLoading, isError } = useHealthCheckQuery("");
+  const { isLoading } = useHealthCheckQuery("");
 
   useEffect(() => {
     const checkEnvironment = () => {
@@ -41,10 +41,6 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return <LoadingScreen />;
-  }
-
-  if (isError) {
-    return <div>Error: Unable to connect to the backend. Please try again later.</div>;
   }
 
   return (
