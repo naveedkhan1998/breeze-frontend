@@ -13,6 +13,8 @@ import { Flowbite } from "flowbite-react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage";
 import { useEffect, ReactElement } from "react";
+import { useHealthCheckQuery } from "./services/baseApi";
+import LoadingScreen from "./components/LoadingScreen";
 
 // Define the props for PrivateRoute
 interface PrivateRouteProps {
@@ -26,16 +28,24 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
 };
 
 const App: React.FC = () => {
+  const { isLoading, isError } = useHealthCheckQuery("");
+
   useEffect(() => {
-    // Function to check if running on localhost or production
     const checkEnvironment = () => {
       const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
       localStorage.setItem("isLocalhost", JSON.stringify(isLocalhost));
     };
 
-    // Call the function on page load
     checkEnvironment();
   }, []);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isError) {
+    return <div>Error: Unable to connect to the backend. Please try again later.</div>;
+  }
 
   return (
     <BrowserRouter>
