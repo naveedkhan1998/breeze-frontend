@@ -1,5 +1,5 @@
-import { ChangeEvent, FormEvent, useState } from "react";
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
+import { Button, Checkbox, Label, TextInput, Spinner } from "flowbite-react";
 import { useAppDispatch } from "../app/hooks";
 import { useRegisterUserMutation } from "../services/userAuthService";
 import { storeToken } from "../services/LocalStorageService";
@@ -22,10 +22,10 @@ interface Token {
   refresh: string;
 }
 
-const Registration = () => {
+const Registration: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [registerUser] = useRegisterUserMutation();
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -58,14 +58,14 @@ const Registration = () => {
       storeToken({ value: { access: token.access } });
       dispatch(setCredentials({ access: token.access }));
       toast.success("Registration successful");
-      navigate("/"); // Navigate to home page after successful registration
+      navigate("/");
     } catch (error) {
       toast.error("Registration failed. Please try again.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col w-full max-w-md gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
       <div>
         <Label htmlFor="name" value="Full Name" className="block mb-2" />
         <TextInput id="name" type="text" icon={HiUser} placeholder="John Doe" value={formData.name} onChange={handleChange} required />
@@ -91,8 +91,9 @@ const Registration = () => {
           </a>
         </Label>
       </div>
-      <Button type="submit" className="mt-4">
-        Register new account
+      <Button type="submit" className="mt-4" disabled={isLoading}>
+        {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
+        {isLoading ? "Registering..." : "Register new account"}
       </Button>
     </form>
   );

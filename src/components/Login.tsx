@@ -1,5 +1,5 @@
-import  { ChangeEvent, FormEvent, useState } from "react";
-import { Button, TextInput, Label } from "flowbite-react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
+import { Button, TextInput, Label, Spinner } from "flowbite-react";
 import { useLoginUserMutation } from "../services/userAuthService";
 import { useAppDispatch } from "../app/hooks";
 import { setCredentials } from "../features/authSlice";
@@ -19,10 +19,10 @@ interface Token {
   refresh: string;
 }
 
-const Login = () => {
+const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [loginUser] = useLoginUserMutation();
+  const [loginUser, { isLoading }] = useLoginUserMutation();
 
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -44,14 +44,14 @@ const Login = () => {
       storeToken({ value: { access: token.access } });
       dispatch(setCredentials({ access: token.access }));
       toast.success("Logged In Successfully");
-      navigate("/"); // Navigate to home page after successful login
+      navigate("/");
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
     }
   };
 
   return (
-    <form className="flex flex-col w-full max-w-md gap-4" onSubmit={handleSubmit}>
+    <form className="flex flex-col w-full gap-4" onSubmit={handleSubmit}>
       <div>
         <Label htmlFor="email" value="Email" className="block mb-2" />
         <TextInput id="email" type="email" icon={HiMail} placeholder="name@company.com" value={formData.email} onChange={handleChange} required />
@@ -60,9 +60,16 @@ const Login = () => {
         <Label htmlFor="password" value="Password" className="block mb-2" />
         <TextInput id="password" type="password" icon={HiLockClosed} placeholder="••••••••" value={formData.password} onChange={handleChange} required />
       </div>
-      <Button type="submit" className="mt-4">
-        Log in
+      <Button type="submit" className="mt-4" disabled={isLoading}>
+        {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
+        {isLoading ? "Logging in..." : "Log in"}
       </Button>
+      <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+        Forgot your password?{" "}
+        <a href="#" className="text-blue-600 hover:underline dark:text-blue-500">
+          Reset it here
+        </a>
+      </p>
     </form>
   );
 };

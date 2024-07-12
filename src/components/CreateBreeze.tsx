@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useCreateBreezeMutation } from "../services/breezeServices";
-import { Button, Card, Spinner } from "flowbite-react";
+import { Button, Card, Spinner, TextInput, Checkbox, Label } from "flowbite-react";
+import { toast } from "react-toastify";
 
 interface FormData {
   name: string;
@@ -19,7 +20,7 @@ const CreateBreezeForm: React.FC = () => {
     is_active: true,
   });
 
-  const [createBreeze, { isLoading, isSuccess, isError }] = useCreateBreezeMutation();
+  const [createBreeze, { isLoading }] = useCreateBreezeMutation();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -29,84 +30,48 @@ const CreateBreezeForm: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      createBreeze(formData);
+      await createBreeze(formData).unwrap();
+      toast.success("Breeze account created successfully!");
+      setFormData({
+        name: "",
+        api_key: "",
+        api_secret: "",
+        session_token: "",
+        is_active: true,
+      });
     } catch (error) {
+      toast.error("Failed to create breeze account.");
       console.error("Failed to create breeze account:", error);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
-      <Card className="w-full max-w-md p-6 mt-8 mb-8 space-y-6 bg-white rounded-md shadow-md dark:bg-gray-800">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-md p-6 space-y-6">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Create Breeze Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="block w-full px-4 py-2 text-gray-900 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-500"
-              required
-            />
+            <TextInput type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Account Name" required />
           </div>
-
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">API Key</label>
-            <input
-              type="text"
-              name="api_key"
-              value={formData.api_key}
-              onChange={handleChange}
-              className="block w-full px-4 py-2 text-gray-900 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-500"
-              required
-            />
+            <TextInput type="text" name="api_key" value={formData.api_key} onChange={handleChange} placeholder="API Key" required />
           </div>
-
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">API Secret</label>
-            <input
-              type="text"
-              name="api_secret"
-              value={formData.api_secret}
-              onChange={handleChange}
-              className="block w-full px-4 py-2 text-gray-900 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-500"
-              required
-            />
+            <TextInput type="password" name="api_secret" value={formData.api_secret} onChange={handleChange} placeholder="API Secret" required />
           </div>
-
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Session Token</label>
-            <input
-              type="text"
-              name="session_token"
-              value={formData.session_token}
-              onChange={handleChange}
-              className="block w-full px-4 py-2 text-gray-900 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-500"
-            />
+            <TextInput type="text" name="session_token" value={formData.session_token} onChange={handleChange} placeholder="Session Token (Optional)" />
           </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={formData.is_active}
-              onChange={handleChange}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500"
-            />
-            <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Active</label>
+          <div className="flex items-center gap-2">
+            <Checkbox id="is_active" name="is_active" checked={formData.is_active} onChange={handleChange} />
+            <Label htmlFor="is_active">Active</Label>
           </div>
-
-          <Button type="submit" gradientDuoTone="cyanToBlue" className="w-full">
+          <Button type="submit" gradientDuoTone="purpleToPink" className="w-full" disabled={isLoading}>
             {isLoading ? <Spinner size="sm" /> : "Create Breeze Account"}
           </Button>
-
-          {isSuccess && <p className="mt-4 text-sm text-center text-green-600 dark:text-green-400">Breeze account created successfully!</p>}
-          {isError && <p className="mt-4 text-sm text-center text-red-600 dark:text-red-400">Failed to create breeze account.</p>}
         </form>
       </Card>
     </div>
