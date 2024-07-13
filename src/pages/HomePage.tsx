@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Spinner, Table, Card } from "flowbite-react";
+import { Button, Spinner, Card } from "flowbite-react";
 import { HiTrash, HiChartBar, HiRefresh } from "react-icons/hi";
 import { useDeleteInstrumentMutation, useGetSubscribedInstrumentsQuery } from "../services/instrumentService";
 import { toast } from "react-toastify";
@@ -27,66 +27,63 @@ export interface Instrument {
   exchange: number;
 }
 
-const InstrumentTable: React.FC<{
-  instruments: Instrument[];
+const InstrumentCard: React.FC<{
+  instrument: Instrument;
   onDelete: (id: number) => void;
-  deletingRowIds: number[];
-}> = ({ instruments, onDelete, deletingRowIds }) => {
+  isDeleting: boolean;
+}> = ({ instrument, onDelete, isDeleting }) => {
+  const isLoading = instrument.percentage.some((p) => p.is_loading);
+
   return (
-    <div className="overflow-x-auto">
-      <Table striped hoverable>
-        <Table.Head>
-          <Table.HeadCell className="px-6 py-3">Company Name</Table.HeadCell>
-          <Table.HeadCell className="px-6 py-3">Progress</Table.HeadCell>
-          <Table.HeadCell className="px-6 py-3">Actions</Table.HeadCell>
-        </Table.Head>
-        <Table.Body className="divide-y">
-          {instruments.map((instrument) => (
-            <Table.Row key={instrument.id} className={`bg-white dark:border-gray-700 dark:bg-gray-800 ${deletingRowIds.includes(instrument.id) ? "opacity-50 cursor-wait" : ""}`}>
-              <Table.Cell className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{instrument.company_name}</Table.Cell>
-              <Table.Cell className="px-6 py-4">
-                {instrument.percentage.length > 0 ? (
-                  instrument.percentage.map((p, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${p.percentage}%` }}></div>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">{p.percentage.toFixed(2)}%</span>
-                      {p.is_loading ? null : <Spinner size="sm" />}
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-sm text-gray-500 dark:text-gray-400">No data</span>
-                )}
-              </Table.Cell>
-              <Table.Cell className="px-6 py-4">
-                <div className="flex space-x-2">
-                  <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }}>
-                    <Button size="sm" gradientDuoTone="tealToLime">
-                      <HiChartBar className="w-4 h-4 mr-2" />
-                      View Graph
-                    </Button>
-                  </Link>
-                  <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)}>
-                    <HiTrash className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-    </div>
+    <Card className="mb-4">
+      <h5 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">{instrument.company_name}</h5>
+      <div className="mb-4">
+        {instrument.percentage.length > 0 ? (
+          instrument.percentage.map((p, index) => (
+            <div key={index} className="flex items-center mb-2 space-x-2">
+              <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${p.percentage}%` }}></div>
+              </div>
+              <span className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{p.percentage.toFixed(2)}%</span>
+              {!p.is_loading && <Spinner size="sm" />}
+            </div>
+          ))
+        ) : (
+          <span className="text-sm text-gray-500 dark:text-gray-400">No data</span>
+        )}
+      </div>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+        <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }} className="w-full sm:w-auto">
+          <Button disabled={!isLoading} size="sm" gradientDuoTone="tealToLime" className="w-full">
+            <HiChartBar className="w-4 h-4 mr-2" />
+            View Graph
+          </Button>
+        </Link>
+        <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)} className="w-full sm:w-auto" disabled={isDeleting}>
+          <HiTrash className="w-4 h-4 mr-2" />
+          Delete
+        </Button>
+      </div>
+    </Card>
   );
 };
 
-// HomePage component
+const getAveragePercentage = (instrument: Instrument): number => {
+  if (instrument.percentage.length === 0) return 0;
+  const sum = instrument.percentage.reduce((acc, curr) => acc + curr.percentage, 0);
+  return sum / instrument.percentage.length;
+};
+
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery("");
   const [deleteInstrument] = useDeleteInstrumentMutation();
   const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
   const [isHealthChecking, setIsHealthChecking] = useState(false);
+
+  const sortedInstruments = React.useMemo(() => {
+    if (!data?.data) return [];
+    return [...data.data].sort((a, b) => getAveragePercentage(b) - getAveragePercentage(a));
+  }, [data]);
 
   const handleDelete = async (id: number) => {
     setDeletingRowIds((prevIds) => [...prevIds, id]);
@@ -174,28 +171,35 @@ const HomePage: React.FC = () => {
   }, [data, refetch]);
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
-      <Card className="w-full max-w-6xl mt-8 mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Subscribed Instruments</h1>
-          <div className="flex space-x-2">
-            <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm">
-              <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
-              {isHealthChecking ? "Checking..." : "Check Worker Health"}
-            </Button>
-            <Button onClick={() => refetch()} color="light" size="sm">
-              Refresh Data
-            </Button>
+    <div className="flex flex-col items-center w-full min-h-screen p-2 bg-gray-100 md:p-4 dark:bg-gray-900">
+      <div className="w-full max-w-6xl mt-4 mb-4 md:mt-8 md:mb-8">
+        <Card>
+          <div className="flex flex-col items-start justify-between mb-4 md:flex-row md:items-center md:mb-6">
+            <h1 className="mb-4 text-2xl font-bold text-gray-900 md:text-3xl dark:text-white md:mb-0">Subscribed Instruments</h1>
+            <div className="flex flex-col w-full space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:w-auto">
+              <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full md:w-auto">
+                <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
+                {isHealthChecking ? "Checking..." : "Check Worker Health"}
+              </Button>
+              <Button onClick={() => refetch()} color="light" size="sm" className="w-full md:w-auto">
+                Refresh Data
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
+
         {data ? (
-          <InstrumentTable instruments={data.data} onDelete={handleDelete} deletingRowIds={deletingRowIds} />
+          <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3">
+            {sortedInstruments.map((instrument: Instrument) => (
+              <InstrumentCard key={instrument.id} instrument={instrument} onDelete={handleDelete} isDeleting={deletingRowIds.includes(instrument.id)} />
+            ))}
+          </div>
         ) : (
           <div className="flex items-center justify-center h-64">
             <Spinner size="xl" />
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 };

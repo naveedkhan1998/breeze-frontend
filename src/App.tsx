@@ -11,10 +11,10 @@ import InstrumentsPage from "./pages/InstrumentsPage";
 import LoginRegPage from "./pages/LoginRegPage";
 import { Flowbite } from "flowbite-react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import NotFoundPage from "./pages/NotFoundPage";
 import { useEffect, ReactElement } from "react";
 import { useHealthCheckQuery } from "./services/baseApi";
 import LoadingScreen from "./components/LoadingScreen";
+import NotFoundPage from "./pages/NotFoundPage";
 
 // Define the props for PrivateRoute
 interface PrivateRouteProps {
@@ -28,7 +28,8 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
 };
 
 const App: React.FC = () => {
-  const { isLoading } = useHealthCheckQuery("");
+  // Perform the initial health check
+  const { isLoading, refetch } = useHealthCheckQuery("");
 
   useEffect(() => {
     const checkEnvironment = () => {
@@ -38,6 +39,16 @@ const App: React.FC = () => {
 
     checkEnvironment();
   }, []);
+
+  useEffect(() => {
+    // Set up a recurring health check every 2 minutes
+    const intervalId = setInterval(() => {
+      refetch();
+    }, 120000); // 120000 ms = 2 minutes
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [refetch]);
 
   if (isLoading) {
     return <LoadingScreen />;
