@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { useGetBreezeQuery, useUpdateBreezeMutation } from "../services/breezeServices";
+import { useGetBreezeQuery, useLazySetupQuery, useUpdateBreezeMutation } from "../services/breezeServices";
 import { BreezeAccount } from "../common-types";
 import { Button, Card, Modal, Spinner, TextInput } from "flowbite-react";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ const AccountsPage = () => {
   const [sessionToken, setSessionToken] = useState("");
 
   const [updateBreeze, { isLoading: isUpdating }] = useUpdateBreezeMutation();
+  const [triggerSetup, { isLoading: isSetupLoading }] = useLazySetupQuery();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSessionToken(e.target.value);
@@ -35,6 +36,16 @@ const AccountsPage = () => {
       } catch (error) {
         toast.error("Failed to update session token");
       }
+    }
+  };
+
+  const handleSetup = async () => {
+    try {
+      await triggerSetup("");
+      toast.success("Setup completed successfully");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to complete setup");
     }
   };
 
@@ -62,6 +73,11 @@ const AccountsPage = () => {
   return (
     <div className="container px-4 py-8 mx-auto">
       <h1 className="mb-8 text-3xl font-bold text-center text-gray-800 dark:text-white">Breeze Accounts</h1>
+      <div className="flex justify-end mb-4">
+        <Button gradientDuoTone="greenToBlue" onClick={handleSetup} disabled={isSetupLoading}>
+          {isSetupLoading ? <Spinner size="sm" /> : "Setup"}
+        </Button>
+      </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {data.data.map((account: BreezeAccount) => (
           <Card key={account.id} className="transition-shadow duration-300 hover:shadow-lg">
