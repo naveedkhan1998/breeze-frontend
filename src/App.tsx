@@ -11,7 +11,7 @@ import InstrumentsPage from "./pages/InstrumentsPage";
 import LoginRegPage from "./pages/LoginRegPage";
 import { Flowbite } from "flowbite-react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { useEffect, ReactElement } from "react";
+import { useEffect, ReactElement, useState } from "react";
 import { useHealthCheckQuery } from "./services/baseApi";
 import LoadingScreen from "./components/LoadingScreen";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -28,7 +28,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
 };
 
 const App: React.FC = () => {
-  // Perform the initial health check
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
   const { isLoading, refetch } = useHealthCheckQuery("");
 
   useEffect(() => {
@@ -38,7 +38,12 @@ const App: React.FC = () => {
     };
 
     checkEnvironment();
-  }, []);
+
+    // Mark initial check as complete after the first query
+    if (isLoading === false && !initialCheckComplete) {
+      setInitialCheckComplete(true);
+    }
+  }, [isLoading, initialCheckComplete]);
 
   useEffect(() => {
     // Set up a recurring health check every 2 minutes
@@ -50,7 +55,7 @@ const App: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [refetch]);
 
-  if (isLoading) {
+  if (isLoading && !initialCheckComplete) {
     return <LoadingScreen />;
   }
 
