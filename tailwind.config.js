@@ -12,18 +12,19 @@ export default {
     extend: {
       colors: {
         blue: {
-          primary: '#590EB0',
-          secondary: '#FFFFFF',
+          primary: "#590EB0",
+          secondary: "#FFFFFF",
         },
         gray: {
-          light: '#ecf0f1',
-          dark: '#2c3e50',
+          light: "#ecf0f1",
+          dark: "#2c3e50",
         },
-        text: '#333333',
-        negative: '#e74c3c',
+        text: "#333333",
+        negative: "#e74c3c",
       },
     },
   },
-  plugins: ["flowbite/plugin"],
+  // eslint-disable-next-line no-undef
+  plugins: [require("flowbite/plugin")],
   darkMode: "class",
 };

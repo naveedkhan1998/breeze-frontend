@@ -30,7 +30,7 @@ const GraphsPage: React.FC = () => {
   const { obj } = (location.state as LocationState) || {};
   const [timeframe, setTimeFrame] = useState<number>(60);
   const [chartType, setChartType] = useState<SeriesType>("Candlestick");
-  const [showVolume, setShowVolume] = useState<boolean>(true);
+  const [showVolume, setShowVolume] = useState<boolean>(false);
   const [indicators, setIndicators] = useState<Indicator[]>([
     { name: "MA", active: false, data: [] },
     { name: "Bollinger Bands", active: false, data: [] },
@@ -436,9 +436,8 @@ const GraphsPage: React.FC = () => {
               </Button>
               <Dropdown label={`Chart: ${chartType}`} size="sm">
                 <Dropdown.Item onClick={() => setChartType("Candlestick")}>Candlestick</Dropdown.Item>
-                <Dropdown.Item onClick={() => setChartType("Line")}>Line</Dropdown.Item>
               </Dropdown>
-              <Dropdown label="Indicators" size="sm">
+              <Dropdown label="Indicators" size="sm" dismissOnClick={false}>
                 {indicators.map((indicator) => (
                   <Dropdown.Item key={indicator.name}>
                     <div className="flex items-center justify-between w-full">
