@@ -42,6 +42,7 @@ const CreateBreezeForm: React.FC = () => {
         session_token: "",
         is_active: true,
       });
+      window.location.reload();
     } catch (error) {
       toast.error("Failed to create breeze account.");
       console.error("Failed to create breeze account:", error);
@@ -49,25 +50,39 @@ const CreateBreezeForm: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Card className="w-full max-w-md p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Create Breeze Account</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="flex items-start justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-lg p-8 space-y-6 rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white">Create Breeze Account</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <TextInput type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Account Name" required />
+            <Label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Account Name
+            </Label>
+            <TextInput type="text" name="name" id="name" value={formData.name} onChange={handleChange} placeholder="Account Name" required className="w-full" />
           </div>
           <div>
-            <TextInput type="text" name="api_key" value={formData.api_key} onChange={handleChange} placeholder="API Key" required />
+            <Label htmlFor="api_key" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              API Key
+            </Label>
+            <TextInput type="text" name="api_key" id="api_key" value={formData.api_key} onChange={handleChange} placeholder="API Key" required className="w-full" />
           </div>
           <div>
-            <TextInput type="password" name="api_secret" value={formData.api_secret} onChange={handleChange} placeholder="API Secret" required />
+            <Label htmlFor="api_secret" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              API Secret
+            </Label>
+            <TextInput type="password" name="api_secret" id="api_secret" value={formData.api_secret} onChange={handleChange} placeholder="API Secret" required className="w-full" />
           </div>
           <div>
-            <TextInput type="text" name="session_token" value={formData.session_token} onChange={handleChange} placeholder="Session Token (Optional)" />
+            <Label htmlFor="session_token" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Session Token (Optional)
+            </Label>
+            <TextInput type="text" name="session_token" id="session_token" value={formData.session_token} onChange={handleChange} placeholder="Session Token (Optional)" className="w-full" />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <Checkbox id="is_active" name="is_active" checked={formData.is_active} onChange={handleChange} />
-            <Label htmlFor="is_active">Active</Label>
+            <Label htmlFor="is_active" className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
+              Active
+            </Label>
           </div>
           <Button type="submit" gradientDuoTone="purpleToPink" className="w-full" disabled={isLoading}>
             {isLoading ? <Spinner size="sm" /> : "Create Breeze Account"}

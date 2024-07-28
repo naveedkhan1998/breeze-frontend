@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-//@ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Dropdown, Spinner, Card, Tooltip } from "flowbite-react";
-import { createChart, IChartApi, SeriesType, ISeriesApi, Time, ITimeScaleApi } from "lightweight-charts";
+import { Button, Dropdown, Spinner, Card, Tooltip, ToggleSwitch } from "flowbite-react";
+import { createChart, IChartApi, SeriesType, ISeriesApi, Time, ITimeScaleApi, LineData } from "lightweight-charts";
 import { useGetCandlesQuery, useLoadInstrumentCandlesMutation } from "../services/instrumentService";
 import { formatDate } from "../common-functions";
 import { Candle } from "../common-types";
@@ -18,6 +17,12 @@ interface LocationState {
   obj: Instrument;
 }
 
+interface Indicator {
+  name: string;
+  active: boolean;
+  data: any[];
+}
+
 const GraphsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,10 +30,13 @@ const GraphsPage: React.FC = () => {
   const { obj } = (location.state as LocationState) || {};
   const [timeframe, setTimeFrame] = useState<number>(60);
   const [chartType, setChartType] = useState<SeriesType>("Candlestick");
-  const [showMA, setShowMA] = useState<boolean>(false);
-  const [maPeriod, setMAPeriod] = useState<number>(20);
   const [showVolume, setShowVolume] = useState<boolean>(true);
-  const [indicator, setIndicator] = useState<string>("");
+  const [indicators, setIndicators] = useState<Indicator[]>([
+    { name: "MA", active: false, data: [] },
+    { name: "Bollinger Bands", active: false, data: [] },
+    { name: "RSI", active: false, data: [] },
+    { name: "MACD", active: false, data: [] },
+  ]);
   const { data, refetch, isLoading, isFetching } = useGetCandlesQuery({
     id: obj?.id,
     tf: timeframe,
@@ -55,23 +63,33 @@ const GraphsPage: React.FC = () => {
     }));
   }, [data]);
 
-  const maData = useMemo(() => {
-    if (!showMA || !seriesData.length) return [];
-    return calculateMA(seriesData, maPeriod);
-  }, [seriesData, showMA, maPeriod]);
-
-  const indicatorData = useMemo(() => {
-    switch (indicator) {
-      case "Bollinger Bands":
-        return calculateBollingerBands(seriesData);
-      case "RSI":
-        return calculateRSI(seriesData);
-      case "MACD":
-        return calculateMACD(seriesData);
-      default:
-        return [];
+  useEffect(() => {
+    if (seriesData.length > 0) {
+      const updatedIndicators = indicators.map((indicator) => {
+        let data:
+          | LineData<Time>[]
+          | { time: string | undefined; upper: number; middle: number; lower: number }[]
+          | { time: string | undefined; value: number }[]
+          | { time: string | undefined; macd: number; signal: number; histogram: number }[] = [];
+        switch (indicator.name) {
+          case "MA":
+            data = calculateMA(seriesData, 20);
+            break;
+          case "Bollinger Bands":
+            data = calculateBollingerBands(seriesData);
+            break;
+          case "RSI":
+            data = calculateRSI(seriesData);
+            break;
+          case "MACD":
+            data = calculateMACD(seriesData);
+            break;
+        }
+        return { ...indicator, data };
+      });
+      setIndicators(updatedIndicators);
     }
-  }, [seriesData, indicator]);
+  }, [seriesData]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -92,9 +110,9 @@ const GraphsPage: React.FC = () => {
         indicatorChartContainerRef.current.style.height = `${height}px`;
       }
     };
-
+    //@ts-expect-error no shit
     const syncCharts = (mainTimeScale: ITimeScaleApi, indicatorTimeScale: ITimeScaleApi) => {
-      const onVisibleTimeRangeChange = (newTimeRange) => {
+      const onVisibleTimeRangeChange = (newTimeRange: any) => {
         indicatorTimeScale.setVisibleRange(newTimeRange);
       };
       mainTimeScale.subscribeVisibleTimeRangeChange(onVisibleTimeRangeChange);
@@ -162,13 +180,34 @@ const GraphsPage: React.FC = () => {
         mainSeries.setData(seriesData);
         seriesRef.current = mainSeries;
 
-        if (showMA) {
-          const maSeries = chart.addLineSeries({
-            color: "#F59E0B",
-            lineWidth: 2,
-          });
-          maSeries.setData(maData);
-        }
+        indicators.forEach((indicator) => {
+          if (indicator.active) {
+            switch (indicator.name) {
+              case "MA":
+                {
+                  const maSeries = chart.addLineSeries({
+                    color: "#F59E0B",
+                    lineWidth: 2,
+                  });
+                  maSeries.setData(indicator.data);
+                }
+                break;
+              case "Bollinger Bands": {
+                const upperBandSeries = chart.addLineSeries({
+                  color: "#10B981",
+                  lineWidth: 1,
+                });
+                const lowerBandSeries = chart.addLineSeries({
+                  color: "#EF4444",
+                  lineWidth: 1,
+                });
+                upperBandSeries.setData(indicator.data.map((d) => ({ time: d.time, value: d.upper })));
+                lowerBandSeries.setData(indicator.data.map((d) => ({ time: d.time, value: d.lower })));
+                break;
+              }
+            }
+          }
+        });
 
         if (showVolume) {
           const volumeSeries = chart.addHistogramSeries({
@@ -181,25 +220,6 @@ const GraphsPage: React.FC = () => {
           volumeSeries.setData(seriesData);
           volumeSeriesRef.current = volumeSeries;
         }
-
-        // if (indicator === "Bollinger Bands") {
-        //   const upperSeries = chart.addLineSeries({
-        //     color: "#F59E0B",
-        //     lineWidth: 1,
-        //   });
-        //   const middleSeries = chart.addLineSeries({
-        //     color: "#F59E0B",
-        //     lineWidth: 1,
-        //   });
-        //   const lowerSeries = chart.addLineSeries({
-        //     color: "#F59E0B",
-        //     lineWidth: 1,
-        //   });
-
-        //   upperSeries.setData(indicatorData.map((d) => ({ time: d.time, value: d.upper })));
-        //   middleSeries.setData(indicatorData.map((d) => ({ time: d.time, value: d.middle })));
-        //   lowerSeries.setData(indicatorData.map((d) => ({ time: d.time, value: d.lower })));
-        // }
 
         const legendContainer = document.createElement("div");
         legendContainer.className = `absolute top-4 left-4 bg-white dark:bg-gray-800 dark:text-white p-2 rounded shadow-md text-sm z-[10]`;
@@ -219,7 +239,6 @@ const GraphsPage: React.FC = () => {
         chart.subscribeCrosshairMove((param) => {
           let ohlcValues = "";
           if (param.time) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data = param.seriesData.get(mainSeries) as any;
             if (data) {
               if (chartType === "Candlestick") {
@@ -243,7 +262,8 @@ const GraphsPage: React.FC = () => {
     };
 
     const renderIndicatorChart = () => {
-      if (indicatorChartContainerRef.current && indicatorData.length) {
+      const activeIndicators = indicators.filter((ind) => ind.active && (ind.name === "RSI" || ind.name === "MACD"));
+      if (indicatorChartContainerRef.current && activeIndicators.length > 0) {
         indicatorChartContainerRef.current.innerHTML = "";
         const height = window.innerHeight * 0.2;
         const chart = createChart(indicatorChartContainerRef.current, {
@@ -283,31 +303,31 @@ const GraphsPage: React.FC = () => {
           },
         });
 
-        if (indicator === "RSI") {
-          const rsiSeries = chart.addLineSeries({
-            color: "#F59E0B",
-            lineWidth: 2,
-          });
-          rsiSeries.setData(indicatorData);
-        }
+        activeIndicators.forEach((indicator) => {
+          if (indicator.name === "RSI") {
+            const rsiSeries = chart.addLineSeries({
+              color: "#F59E0B",
+              lineWidth: 2,
+            });
+            rsiSeries.setData(indicator.data);
+          } else if (indicator.name === "MACD") {
+            const macdSeries = chart.addLineSeries({
+              color: "#3B82F6",
+              lineWidth: 2,
+            });
+            const signalSeries = chart.addLineSeries({
+              color: "#EF4444",
+              lineWidth: 2,
+            });
+            const histogramSeries = chart.addHistogramSeries({
+              color: "#10B981",
+            });
 
-        if (indicator === "MACD") {
-          const macdSeries = chart.addLineSeries({
-            color: "#3B82F6",
-            lineWidth: 2,
-          });
-          const signalSeries = chart.addLineSeries({
-            color: "#EF4444",
-            lineWidth: 2,
-          });
-          const histogramSeries = chart.addHistogramSeries({
-            color: "#10B981",
-          });
-
-          macdSeries.setData(indicatorData.map((d) => ({ time: d.time, value: d.macd })));
-          signalSeries.setData(indicatorData.map((d) => ({ time: d.time, value: d.signal })));
-          histogramSeries.setData(indicatorData.map((d) => ({ time: d.time, value: d.histogram })));
-        }
+            macdSeries.setData(indicator.data.map((d) => ({ time: d.time, value: d.macd })));
+            signalSeries.setData(indicator.data.map((d) => ({ time: d.time, value: d.signal })));
+            histogramSeries.setData(indicator.data.map((d) => ({ time: d.time, value: d.histogram })));
+          }
+        });
 
         indicatorChartRef.current = chart;
 
@@ -324,7 +344,7 @@ const GraphsPage: React.FC = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [seriesData, mode, obj?.company_name, obj?.exchange_code, timeframe, chartType, showMA, maData, showVolume, indicator, indicatorData]);
+  }, [seriesData, mode, obj?.company_name, obj?.exchange_code, timeframe, chartType, showVolume, indicators]);
 
   const handleTfChange = (tf: number) => {
     setTimeFrame(tf);
@@ -340,8 +360,7 @@ const GraphsPage: React.FC = () => {
 
   const handleDownload = () => {
     const headers = "Date,Open,High,Low,Close,Volume";
-    // @ts-expect-error no shit
-    const csvData = seriesData.map((row) => `${row.time},${row.open},${row.high},${row.low},${row.close},${row.value}`);
+    const csvData = seriesData.map((row: { time: any; open: any; high: any; low: any; close: any; value: any }) => `${row.time},${row.open},${row.high},${row.low},${row.close},${row.value}`);
     const csvContent = `data:text/csv;charset=utf-8,${headers}\n${csvData.join("\n")}`;
 
     const encodedUri = encodeURI(csvContent);
@@ -353,10 +372,13 @@ const GraphsPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  const toggleIndicator = (name: string) => {
+    setIndicators((prevIndicators) => prevIndicators.map((ind) => (ind.name === name ? { ...ind, active: !ind.active } : ind)));
+  };
+
   if (!obj) {
     return <div>No instrument data available.</div>;
   }
-
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
       <Card className="w-full max-w-7xl">
@@ -416,45 +438,22 @@ const GraphsPage: React.FC = () => {
                 <Dropdown.Item onClick={() => setChartType("Candlestick")}>Candlestick</Dropdown.Item>
                 <Dropdown.Item onClick={() => setChartType("Line")}>Line</Dropdown.Item>
               </Dropdown>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="showMA"
-                  checked={showMA}
-                  onChange={(e) => setShowMA(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label htmlFor="showMA" className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                  Show MA
-                </label>
-                {showMA && (
-                  <input
-                    type="number"
-                    value={maPeriod}
-                    onChange={(e) => setMAPeriod(parseInt(e.target.value, 10))}
-                    className="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    min="1"
-                  />
-                )}
-                <input
-                  type="checkbox"
-                  id="showVolume"
-                  checked={showVolume}
-                  onChange={(e) => setShowVolume(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label htmlFor="showVolume" className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                  Show Volume
-                </label>
-              </div>
-              <Dropdown label={`Indicator: ${indicator}`} size="sm">
-                {/* <Dropdown.Item onClick={() => setIndicator("Bollinger Bands")}>Bollinger Bands</Dropdown.Item> */}
-                <Dropdown.Item onClick={() => setIndicator("RSI")}>RSI</Dropdown.Item>
-                <Dropdown.Item onClick={() => setIndicator("MACD")}>MACD</Dropdown.Item>
+              <Dropdown label="Indicators" size="sm">
+                {indicators.map((indicator) => (
+                  <Dropdown.Item key={indicator.name}>
+                    <div className="flex items-center justify-between w-full">
+                      <span>{indicator.name}</span>
+                      <ToggleSwitch checked={indicator.active} onChange={() => toggleIndicator(indicator.name)} />
+                    </div>
+                  </Dropdown.Item>
+                ))}
               </Dropdown>
+              <div className="flex items-center space-x-2">
+                <ToggleSwitch checked={showVolume} onChange={(checked) => setShowVolume(checked)} label="Show Volume" />
+              </div>
             </div>
             <div ref={mainChartContainerRef} className="relative w-full mb-4 overflow-hidden rounded-lg"></div>
-            {indicator && <div ref={indicatorChartContainerRef} className="relative w-full overflow-hidden rounded-lg"></div>}
+            {indicators.some((ind) => ind.active && (ind.name === "RSI" || ind.name === "MACD")) && <div ref={indicatorChartContainerRef} className="relative w-full overflow-hidden rounded-lg"></div>}
           </>
         )}
       </Card>
