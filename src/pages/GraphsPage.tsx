@@ -5,10 +5,9 @@ import { Button, Dropdown, Spinner, Card, Tooltip, ToggleSwitch } from "flowbite
 import { createChart, IChartApi, SeriesType, ISeriesApi, Time, ITimeScaleApi, LineData } from "lightweight-charts";
 import { useGetCandlesQuery, useLoadInstrumentCandlesMutation } from "../services/instrumentService";
 import { formatDate } from "../common-functions";
-import { Candle } from "../common-types";
+import { Candle, Instrument } from "../common-types";
 import { useAppSelector } from "../app/hooks";
 import { getMode } from "../features/darkModeSlice";
-import { Instrument } from "./HomePage";
 import { HiArrowLeft, HiRefresh, HiClock, HiDownload, HiInformationCircle } from "react-icons/hi";
 
 import { calculateMA, calculateBollingerBands, calculateRSI, calculateMACD } from "../common-functions";
