@@ -1,65 +1,102 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Spinner, Card } from "flowbite-react";
-import { HiTrash, HiChartBar, HiRefresh } from "react-icons/hi";
 import { useDeleteInstrumentMutation, useGetSubscribedInstrumentsQuery } from "../services/instrumentService";
 import { toast } from "react-toastify";
+import { Instrument } from "../common-types";
+import { HiChartBar, HiRefresh, HiTrash, HiClock, HiCurrencyDollar, HiOfficeBuilding } from "react-icons/hi";
 
-// Define the Instrument interface
-export interface PercentageInstrument {
-  percentage: number;
-  is_loading: boolean;
-}
-
-export interface Instrument {
-  id: number;
-  percentage: PercentageInstrument[];
-  stock_token: string | null;
-  token: string | null;
-  instrument: string | null;
-  short_name: string | null;
-  series: string | null;
-  company_name: string | null;
-  expiry: string | null;
-  strike_price: number | null;
-  option_type: string | null;
-  exchange_code: string | null;
-  exchange: number;
-}
-
-const InstrumentCard: React.FC<{
+interface InstrumentCardProps {
   instrument: Instrument;
   onDelete: (id: number) => void;
   isDeleting: boolean;
-}> = ({ instrument, onDelete, isDeleting }) => {
-  const isLoading = instrument.percentage.some((p) => p.is_loading);
+}
+
+const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDelete, isDeleting }) => {
+  const isLoading = instrument.percentage.some((p) => !p.is_loading);
+
+  const renderInstrumentDetails = () => {
+    const commonDetails = (
+      <>
+        <div className="flex items-center mb-2">
+          <HiOfficeBuilding className="w-5 h-5 mr-2 text-blue-500" />
+          <span className="text-sm text-gray-600 dark:text-gray-300">{instrument.company_name}</span>
+        </div>
+        <div className="flex items-center mb-2">
+          <HiCurrencyDollar className="w-5 h-5 mr-2 text-green-500" />
+          <span className="text-sm text-gray-600 dark:text-gray-300">{instrument.exchange_code}</span>
+        </div>
+      </>
+    );
+
+    switch (true) {
+      case instrument.series === "OPTION":
+        return (
+          <div>
+            {commonDetails}
+            <div className="flex items-center mb-2">
+              <HiClock className="w-5 h-5 mr-2 text-yellow-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                {instrument.strike_price} {instrument.option_type} (Expires: {instrument.expiry})
+              </span>
+            </div>
+          </div>
+        );
+      case instrument.series === "FUTURE":
+        return (
+          <div>
+            {commonDetails}
+            <div className="flex items-center mb-2">
+              <HiClock className="w-5 h-5 mr-2 text-yellow-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">Future (Expires: {instrument.expiry})</span>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div>
+            {commonDetails}
+            <div className="flex items-center mb-2">
+              <HiCurrencyDollar className="w-5 h-5 mr-2 text-green-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">Equity</span>
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
-    <Card className="mb-4">
-      <h5 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">{instrument.company_name}</h5>
-      <div className="mb-4">
-        {instrument.percentage.length > 0 ? (
-          instrument.percentage.map((p, index) => (
-            <div key={index} className="flex items-center mb-2 space-x-2">
-              <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${p.percentage}%` }}></div>
+    <Card className="overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+      <div className="p-5">
+        <h3 className="mb-3 text-2xl font-bold text-gray-800 dark:text-white">{instrument.exchange_code}</h3>
+        <div className="mb-4">{renderInstrumentDetails()}</div>
+        <div className="mb-4">
+          {instrument.percentage.length > 0 ? (
+            instrument.percentage.map((p, index) => (
+              <div key={index} className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{p.percentage.toFixed(2)}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                  <div className="h-2 transition-all duration-500 ease-out rounded-full bg-gradient-to-r from-blue-400 to-blue-600" style={{ width: `${p.percentage}%` }}></div>
+                </div>
+                {!p.is_loading && <Spinner size="sm" className="mt-1" />}
               </div>
-              <span className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{p.percentage.toFixed(2)}%</span>
-              {!p.is_loading && <Spinner size="sm" />}
-            </div>
-          ))
-        ) : (
-          <span className="text-sm text-gray-500 dark:text-gray-400">No data</span>
-        )}
+            ))
+          ) : (
+            <span className="text-sm text-gray-500 dark:text-gray-400">No data available</span>
+          )}
+        </div>
       </div>
-      <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-        <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }} className="w-full sm:w-auto">
-          <Button disabled={!isLoading} size="sm" gradientDuoTone="tealToLime" className="w-full">
+      <div className="flex justify-between gap-2 p-4 bg-gray-50 dark:bg-gray-800">
+        <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }} className="w-full">
+          <Button disabled={isLoading} size="sm" gradientDuoTone="cyanToBlue" className="w-full transition-all duration-300 hover:shadow-lg">
             <HiChartBar className="w-4 h-4 mr-2" />
             View Graph
           </Button>
         </Link>
-        <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)} className="w-full sm:w-auto" disabled={isDeleting}>
+        <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)} className="w-full transition-all duration-300 hover:shadow-lg" disabled={isDeleting}>
           <HiTrash className="w-4 h-4 mr-2" />
           Delete
         </Button>
@@ -90,7 +127,7 @@ const HomePage: React.FC = () => {
     try {
       await deleteInstrument({ id });
       await refetch();
-      toast.warn("Instrument Deleted");
+      toast.success("Instrument successfully deleted");
     } catch (error) {
       console.error("Error deleting instrument:", error);
       toast.error("Failed to delete instrument");
@@ -158,30 +195,30 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage.length > 0 && instrument.percentage.every((p) => p.is_loading));
+      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage.length > 0 && instrument.percentage.every((p) => !p.is_loading));
 
       if (!allLoaded) {
         await refetch();
       } else {
         clearInterval(interval);
       }
-    }, 4000); // 4 seconds
+    }, 2000); // 2 seconds
 
     return () => clearInterval(interval);
   }, [data, refetch]);
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen p-2 bg-gray-100 md:p-4 dark:bg-gray-900">
-      <div className="w-full max-w-6xl mt-4 mb-4 md:mt-8 md:mb-8">
-        <Card>
-          <div className="flex flex-col items-start justify-between mb-4 md:flex-row md:items-center md:mb-6">
-            <h1 className="mb-4 text-2xl font-bold text-gray-900 md:text-3xl dark:text-white md:mb-0">Subscribed Instruments</h1>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="container px-4 py-8 mx-auto">
+        <Card className="mb-8 shadow-lg">
+          <div className="flex flex-col items-center justify-between p-6 md:flex-row">
+            <h1 className="mb-4 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 md:mb-0">Subscribed Instruments</h1>
             <div className="flex flex-col w-full space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:w-auto">
-              <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full md:w-auto">
+              <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
                 <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
                 {isHealthChecking ? "Checking..." : "Check Worker Health"}
               </Button>
-              <Button onClick={() => refetch()} color="light" size="sm" className="w-full md:w-auto">
+              <Button onClick={() => refetch()} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
                 Refresh Data
               </Button>
             </div>
@@ -189,7 +226,7 @@ const HomePage: React.FC = () => {
         </Card>
 
         {data ? (
-          <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-3">
             {sortedInstruments.map((instrument: Instrument) => (
               <InstrumentCard key={instrument.id} instrument={instrument} onDelete={handleDelete} isDeleting={deletingRowIds.includes(instrument.id)} />
             ))}

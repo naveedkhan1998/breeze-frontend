@@ -10,22 +10,29 @@ type Props = {
   searchTerm: string;
 };
 
-const InstrumentItem = ({ instrument, onSubscribe, isSubscribing }: { instrument: InstrumentType; onSubscribe: (id: number) => void; isSubscribing: boolean }) => (
-  <div className="flex flex-col items-start justify-between p-4 border-b border-gray-200 shadow-md md:flex-row md:items-center hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
-    <div className="flex-grow mb-2 md:mb-0">
-      <h5 className="text-lg font-semibold text-gray-900 dark:text-white">{instrument.company_name}</h5>
-      <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+interface InstrumentItemProps {
+  instrument: InstrumentType;
+  onSubscribe: (id: number) => void;
+  isSubscribing: boolean;
+}
+
+const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe, isSubscribing }) => (
+  <div className="flex flex-col items-start justify-between p-4 transition-colors duration-150 ease-in-out border-b border-gray-200 sm:flex-row sm:items-center hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+    <div className="flex-grow mb-3 sm:mb-0">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{instrument.exchange_code}</h3>
+      <div className="mt-1 space-y-1 text-sm text-gray-600 dark:text-gray-400">
         <p>
-          {instrument.short_name} | {instrument.series} | {instrument.stock_token}
+          <span className="font-semibold">Symbol:</span> {instrument.stock_token || instrument.token} |<span className="ml-2 font-semibold">Series:</span> {instrument.series}
         </p>
         <p>
-          Exchange: {instrument.exchange_code} | Expiry: {instrument.expiry || "N/A"}
+          <span className="font-semibold">Exchange:</span> {instrument.exchange_code} |<span className="ml-2 font-semibold">Expiry:</span> {instrument.expiry || "N/A"}
         </p>
-        {instrument.strike_price !== undefined && instrument.option_type && (
+        {instrument.strike_price !== null && instrument.option_type && (
           <p>
-            Strike: {instrument.strike_price} | Type: {instrument.option_type}
+            <span className="font-semibold">Strike:</span> {instrument.strike_price} |<span className="ml-2 font-semibold">Type:</span> {instrument.option_type}
           </p>
         )}
+        <span className="font-semibold">Company Name:</span> <span>{instrument.company_name}</span>
       </div>
     </div>
     <Button size="sm" outline gradientDuoTone="cyanToBlue" onClick={() => onSubscribe(instrument.id)} disabled={isSubscribing}>

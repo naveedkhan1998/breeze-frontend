@@ -10,20 +10,25 @@ export interface RefreshTokenResult {
   };
 }
 
-export type Instrument = {
+export interface PercentageInstrument {
+  percentage: number;
+  is_loading: boolean;
+}
+export interface Instrument {
   id: number;
-  stock_token: string;
-  token: string;
-  instrument: string | null; // nullable due to potential null value in data
-  short_name: string;
-  series: string;
-  company_name: string;
-  expiry: string | null; // nullable due to potential null value in data
-  strike_price: number;
-  option_type: string | null; // nullable due to potential null value in data
-  exchange_code: string;
+  percentage: PercentageInstrument[];
+  stock_token: string | null;
+  token: string | null;
+  instrument: string | null;
+  short_name: string | null;
+  series: string | null;
+  company_name: string | null;
+  expiry: string | null;
+  strike_price: number | null;
+  option_type: string | null;
+  exchange_code: string | null;
   exchange: number;
-};
+}
 
 export type Candle = {
   open: number;
