@@ -50,3 +50,10 @@ export interface BreezeAccount {
   is_active: boolean;
   user: number;
 }
+
+export interface Indicator {
+  name: string;
+  active: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any[];
+}
