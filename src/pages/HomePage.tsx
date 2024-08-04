@@ -195,7 +195,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage.length > 0 && instrument.percentage.every((p) => !p.is_loading));
+      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage.length > 0 && instrument.percentage.every((p) => p.is_loading));
 
       if (!allLoaded) {
         await refetch();
