@@ -506,7 +506,7 @@ const GraphsPage: React.FC = () => {
                 </Dropdown.Item>
               </Dropdown>
 
-              <Button size="sm" onClick={() => obj && handleClick(obj.id)}>
+              <Button size="sm" onClick={() => obj && handleClick(obj.id)} disabled>
                 <HiClock className="w-4 h-4 mr-2" /> Load Candles
               </Button>
 

@@ -25,9 +25,12 @@ export const instrumentApi = baseApi.injectEndpoints({
       },
     }),
     subscribeInstrument: builder.mutation({
-      query: ({ id }) => ({
+      query: ({ id, duration }) => ({
         url: `core/subscribe/${id}`,
         method: "POST",
+        body: {
+          duration: duration,
+        },
         headers: {
           "Content-type": "application/json",
         },
